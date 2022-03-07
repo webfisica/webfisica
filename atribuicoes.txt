@@ -1,0 +1,4 @@
+
+
+ERICA -> movimento1d.html
+ELOIZA -> movimento1d_compara.html
