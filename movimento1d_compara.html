@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)http://physics.bu.edu/~duffy/HTML5/motion_diagrams.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+<script type="text/javascript" async="" src="./movimento1d_compara_files/analytics.js"></script><script async="" src="./movimento1d_compara_files/js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-10');
+</script>
+  
+  <title>Motion Diagrams</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:620px; margin-left:auto; margin-right:auto;">
+<center>
+    <canvas id="myCanvas" width="620" height="260"></canvas>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepback" value="&lt;&lt; Step" onclick="stepBack()">
+      <input type="button" id="stepforward" value="Step &gt;&gt;" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+<br>
+     <div>Car 1 (red), initial values</div>
+     <div id="x1slider">
+      Position:  0 m <input type="range" id="initialx1" min="0" max="30" value="0" step="1" oninput="showx1Value(this.value)" onchange="showx1Value(this.value)"> +30 m &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="initialx1Value">0</div>
+    </div>
+     <div id="v1slider">
+      Velocity: 0 m/s <input type="range" id="initialv1" min="0" max="10" value="5" step="1" oninput="showv1Value(this.value)" onchange="showv1Value(this.value)"> 10 m/s &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="initialv1Value">5</div>
+    </div>
+     <div id="a1slider">
+      Acceleration: -2 m/s/s <input type="range" id="initiala1" min="0" max="4" value="2" step="0.1" oninput="showa1Value(this.value)" onchange="showa1Value(this.value)"> 2 m/s/s &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="initiala1Value">0.0</div>
+    </div>
+<br>
+     <div>Car 2 (blue), initial values</div>
+     <div id="x2slider">
+      Position:  0 m <input type="range" id="initialx2" min="0" max="30" value="0" step="1" oninput="showx2Value(this.value)" onchange="showx2Value(this.value)"> +30 m &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="initialx2Value">0</div>
+    </div>
+     <div id="v2slider">
+      Velocity: 0 m/s <input type="range" id="initialv2" min="0" max="10" value="5" step="1" oninput="showv2Value(this.value)" onchange="showv2Value(this.value)"> 10 m/s &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="initialv2Value">5</div>
+    </div>
+     <div id="a2slider">
+      Acceleration: -2 m/s/s <input type="range" id="initiala2" min="0" max="4" value="2" step="0.1" oninput="showa2Value(this.value)" onchange="showa2Value(this.value)"> 2 m/s/s &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="initiala2Value">0.0</div>
+    </div>
+
+</center>
+
+  <script>
+
+      function showx1Value(newx1Value)
+      {
+             //get the element
+             var display = document.getElementById("initialx1Value");
+             //show the amount
+             display.innerHTML=newx1Value;
+             x1Init = Number(newx1Value);
+             reset();
+     }
+
+      function showv1Value(newv1Value)
+      {
+             //get the element
+             var display = document.getElementById("initialv1Value");
+             //show the amount
+             display.innerHTML=newv1Value;
+             v1 = newv1Value;
+             reset();
+     }
+
+      function showa1Value(newa1Value)
+      {
+             //get the element
+             var display = document.getElementById("initiala1Value");
+             //show the amount
+             a1 = newa1Value - 2;
+             display.innerHTML=a1.toFixed(1);
+             reset();
+     }
+
+      function showx2Value(newx2Value)
+      {
+             //get the element
+             var display = document.getElementById("initialx2Value");
+             //show the amount
+             display.innerHTML=newx2Value;
+             x2Init = Number(newx2Value);
+             reset();
+     }
+
+      function showv2Value(newv2Value)
+      {
+             //get the element
+             var display = document.getElementById("initialv2Value");
+             //show the amount
+             display.innerHTML=newv2Value;
+             v2 = newv2Value;
+             reset();
+     }
+
+      function showa2Value(newa2Value)
+      {
+             //get the element
+             var display = document.getElementById("initiala2Value");
+             //show the amount
+              a2 = newa2Value - 2;
+             display.innerHTML=a2.toFixed(1);
+             reset();
+     }
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        time = index/20;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        x1 = xBase;
+        x2 = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+      var xBase = 100;
+      var yBase = 50;
+      var xInit = 37;
+      var graphType = 1;
+      var graphTitle = 'Comparing motion diagrams';
+      var yAxisTitle = 'y (m)';
+      var slope = 0.4;
+      var yIncrement = 10;
+      var yNumDecimals = 0;
+      var yStart = yBase+160;
+      var plotColor = '#ff00ff';
+      var radius = 6;
+      var maxTime = 10.0;
+      var x1Init = 0;
+      var x1 = xBase;
+      var v1 = 5.0;
+      var a1 = 0.0
+      var y1 = yBase + 40;
+      var x2Init = 0.0;
+      var x2 = xBase;
+      var v2 = 5.0;
+      var a2 = 0.0
+      var y2 = yBase + 80;
+      var time = 0.0;
+      var timer;
+      var runFlag = 1;
+
+      drawMotion();
+
+    function drawMotion() {
+
+//    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if ((x1 >= (xBase+400)) || (x2 >= (xBase+400)) || (x1 < xBase) || (x2 < xBase) || (time >= 50)) runFlag = 0;
+
+//    console.log("In the drawMotion function, with runFlag = " + runFlag + " xBase = " + xBase + " x2 = " + x2 + " time = " + time);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // set background color for the graph
+           context.fillStyle = "#eff";
+           context.fillRect(xBase, yBase, 400, 120);
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+           var axisLabel = '';
+           var axisValue = 0;
+
+         // vertical grid lines
+         for (var i = 0; i <= 10; i++) {
+           context.beginPath();
+           context.moveTo(xBase+40*i, yBase);
+           context.lineTo(xBase+40*i, yBase+130);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = 10*i;
+           axisLabel = axisValue.toFixed(0);
+           context.fillText(axisLabel, xBase+40*i, yBase+140);
+          }
+
+         // horizontal grid lines
+         for (i = 0; i <= 3; i++) {
+           context.beginPath();
+           context.moveTo(xBase, yBase+40*i);
+           context.lineTo(xBase+400, yBase+40*i);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+          }
+
+         // x-axis
+           context.strokeStyle = '#000';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xBase-1, yBase+120);
+           context.lineTo(xBase+420, yBase+120);
+           context.stroke();
+           context.moveTo(xBase+410, yBase+120-6);
+           context.lineTo(xBase+420, yBase+120);
+           context.lineTo(xBase+410, yBase+120+6);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'left';
+           context.fillText('x (m)', xBase+428, yBase+120);
+
+        // draw motion diagrams
+
+           time = index/20.0;
+           var numGhosts = Math.round(0.5*time+0.5);
+
+
+           if (graphType == 1) {
+             context.fillStyle = 'red';
+             context.lineWidth = 2;
+             context.strokeStyle = '#000000';
+
+             for (var i = 0; i < numGhosts; i++)
+             {
+              x1 = xBase + 4*(x1Init +v1*i*2 + 0.5*a1*i*i*4);
+             context.beginPath();
+             context.arc(x1, y1, radius/2, 0, 2 * Math.PI, false);
+             context.fill();
+             context.stroke();
+            }
+
+             x1 = xBase + 4*(x1Init +v1*time + 0.5*a1*time*time);
+             context.beginPath();
+             context.arc(x1, y1, radius, 0, 2 * Math.PI, false);
+             context.fill();
+             context.stroke();
+
+             context.fillStyle = 'blue';
+             for (i = 0; i < numGhosts; i++)
+             {
+             x2 = xBase + 4*(x2Init +v2*i*2 + 0.5*a2*i*i*4);
+             context.beginPath();
+             context.arc(x2, y2, radius/2, 0, 2 * Math.PI, false);
+             context.fill();
+             context.stroke();
+            }
+
+             x2 = xBase + 4*(x2Init +v2*time + 0.5*a2*time*time);
+             context.beginPath();
+             context.arc(x2, y2, radius, 0, 2 * Math.PI, false);
+             context.fill();
+             context.lineWidth = 2;
+             context.stroke();
+
+           }
+
+           // graph title
+           context.font = 'bold 18pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, (canvas.width)/2, 24);
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+
+        var timeLabel = 't = ';
+        timeLabel = timeLabel + time.toFixed(2) + ' s';
+        context.textAlign = 'left';
+        context.fillText(timeLabel, xBase+20, 230);
+
+        context.fillStyle = 'red';
+        var xPos = (x1Init +v1*time + 0.5*a1*time*time);
+        var xPosLabel = 'x = ';
+        xPosLabel = xPosLabel + xPos.toFixed(2) + ' m';
+        context.textAlign = 'left';
+        context.fillText(xPosLabel, xBase+140, 230);
+
+        context.fillStyle = 'blue';
+        var xPos = (x2Init +v2*time + 0.5*a2*time*time);
+        var yPosLabel = 'x = ';
+        yPosLabel = yPosLabel + xPos.toFixed(2) + ' m';
+        context.textAlign = 'left';
+        context.fillText(yPosLabel, xBase+270, 230);
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/30);
+        }
+      }
+
+  </script>
+
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="./movimento1d_compara_files/88x31.png"></a><br>This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br>This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+
+  <p>The counter has been running on this page since 8-9-2018. The number of people accessing the page since then is:
+<br><img src="./movimento1d_compara_files/Count.cgi" align="absmiddle">
+
+</p></body></html>
