@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)http://physics.bu.edu/~duffy/HTML5/Galileos_ramp.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="./rampa_galileo_files/js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-10');
+</script>
+  
+  <title>Galileo's Ramp</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:700px; margin-left:auto; margin-right:auto;">
+<center>
+<h3> Ball sliding down a ramp</h3>
+</center>
+    <canvas id="myCanvas" width="700" height="180"></canvas>
+<center>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepback" value="&lt;&lt; Step" onclick="stepBack()">
+      <input type="button" id="stepforward" value="Step &gt;&gt;" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+     <div>Horizontal position of bell 2</div>
+     <div id="slider1">
+      3 cm <input type="range" id="B2Value" min="3" max="77" value="20" step="1" oninput="bell2(this.value)" onchange="bell2(this.value)">  77 cm
+<div id="initialBell2Value">20</div>
+    </div>
+     <div>Horizontal position of bell 3</div>
+     <div id="slider2">
+      3 cm <input type="range" id="B3Value" min="3" max="77" value="40" step="1" oninput="bell3(this.value)" onchange="bell3(this.value)">  77 cm
+<div id="initialBell3Value">40</div>
+    </div>
+     <div>Horizontal position of bell 4</div>
+     <div id="slider3">
+      3 cm <input type="range" id="B4Value" min="3" max="77" value="60" step="1" oninput="bell4(this.value)" onchange="bell4(this.value)">  77 cm
+<div id="initialBell4Value">60</div>
+    </div>
+
+</center>
+
+  <script>
+
+      function bell2(newValue)
+      {
+             //get the element
+             var display = document.getElementById("initialBell2Value");
+             //show the amount
+             display.innerHTML=newValue;
+             bellX2 = Number(newValue);
+             reset();
+     }
+
+      function bell3(newValue)
+      {
+             //get the element
+             var display = document.getElementById("initialBell3Value");
+             //show the amount
+             display.innerHTML=newValue;
+             bellX3 = Number(newValue);
+             reset();
+     }
+
+           function bell4(newValue)
+      {
+             //get the element
+             var display = document.getElementById("initialBell4Value");
+             //show the amount
+             display.innerHTML=newValue;
+             bellX4 = Number(newValue);
+             reset();
+     }
+
+
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        time = index/20;
+        xPos = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        hyp1 = Math.sqrt(H1*H1 + B1*B1);
+        a1 = g*H1/hyp1;
+        rampTime1 = Math.sqrt(2*hyp1/a1);
+        v1 = Math.sqrt(2*g*H1);
+        hyp2 = Math.sqrt(H2*H2 + B2*B2);
+        a2 = g*H2/hyp2;
+        rampTime2 = Math.sqrt(2*hyp2/a2);
+        v2 = Math.sqrt(2*g*H2);
+        oldx1 = 0.0;
+
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+      var xBase = 150;
+      var yBase = 60;
+      var xInit = 37;
+      var graphType = 1;
+      var graphTitle = 'Ball on a ramp';
+      var yAxisTitle = 'height (cm)';
+      var xAxisTitle = 'x (cm)';
+      var yIncrement = 10;
+      var yNumDecimals = 0;
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var scenario = 1;
+      var H1 = 13.44;
+      var B1 = 80;
+      var H2 = 20;
+      var B2 = 60;
+      var g = 980;
+      var hyp1 = Math.sqrt(H1*H1 + B1*B1);
+      var d1 = 0.0;
+      var x1 = 0.0;
+      var oldd1 = 0.0;
+      var oldTime = 0.0;
+      var y1;
+      var a1 = g*H1/hyp1;
+      var rampTime1 = Math.sqrt(2*hyp1/a1);
+      var v1 = Math.sqrt(2*g*H1);
+      var hyp2 = Math.sqrt(H2*H2 + B2*B2);
+      var d2;
+      var x2;
+      var y2;
+      var a2 = g*H2/hyp2;
+      var rampTime2 = Math.sqrt(2*hyp2/a2);
+      var v2 = Math.sqrt(2*g*H2);
+      var radius = 8;
+      var time = 0.0;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+      var beep1 = new Audio("beep.wav");
+      var beep2 = new Audio("beep.wav");
+      var beep3 = new Audio("beep.wav");
+      var beep4 = new Audio("beep.wav");
+      var beep5 = new Audio("beep.wav");
+      var bellX1 = 0.0;
+      var bellX2 = 20.0;
+      var bellX3 = 40.0;
+      var bellX4 = 60.0;
+      var bellX5 = 80.0;
+
+      reset();
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if (index >= 226) runFlag = 0;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " Fx = " + Fx);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+// play the sound?
+
+        if (index == 1) beep1.play();
+        if ((d1 > hyp1*bellX2/80.0) && (oldd1 <= hyp1*bellX2/80.0)) beep2.play();
+        if ((d1 > hyp1*bellX3/80.0) && (oldd1 <= hyp1*bellX3/80.0)) beep3.play();
+        if ((d1 > hyp1*bellX4/80.0) && (oldd1 <= hyp1*bellX4/80.0)) beep4.play();
+        if  ((time > rampTime1) && (oldTime <= rampTime1))  beep5.play();
+//        console.log("In the drawMotion function, with d1 = " + d1 + " oldd1 = " + oldd1);
+        oldd1 = d1;
+        oldTime = time;
+
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // set background color for the top half
+           context.fillStyle = "#eff";
+           context.fillRect(xBase, yBase, 400, 80);
+
+
+           context.strokeStyle = '#000';
+           context.lineWidth = 1;
+
+        // vertical grid lines
+         for (var i = 0; i <= 10; i++) {
+           context.beginPath();
+           context.moveTo(xBase+40*i, yBase);
+           context.lineTo(xBase+40*i, yBase+86);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = 10*i;
+           axisLabel = axisValue.toFixed(0);
+           context.fillText(axisLabel, xBase+40*i, yBase+95);
+
+          }
+
+         // horizontal grid lines
+         for (i = 0; i <= 2; i++) {
+           context.beginPath();
+           context.moveTo(xBase-10, yBase+40*i);
+           context.lineTo(xBase+400, yBase+40*i);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+
+           if (graphType == 1) {
+              axisValue = yIncrement*(2-i);
+
+           }
+
+
+           axisLabel = axisValue.toFixed(yNumDecimals);
+           context.fillText(axisLabel, xBase-24, yBase+40*i);
+
+
+          }
+
+         // x-axis
+           context.strokeStyle = '#000';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xBase-1, yBase+80);
+           context.lineTo(xBase+420, yBase+80);
+           context.stroke();
+           context.moveTo(xBase+410, yBase+80-6);
+           context.lineTo(xBase+420, yBase+80);
+           context.lineTo(xBase+410, yBase+80+6);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'left';
+           context.fillText(xAxisTitle, xBase+428, yBase+80);
+
+
+         // y-axis
+           context.strokeStyle = '#000';
+           context.beginPath();
+           context.moveTo(xBase, yBase-20);
+           context.lineTo(xBase, yBase+80);
+           context.stroke();
+           context.moveTo(xBase-6, yBase-10);
+           context.lineTo(xBase, yBase-20);
+           context.lineTo(xBase+6, yBase-10);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.strokeStyle = '#000';
+           context.textAlign = 'center';
+           context.fillText(yAxisTitle, xBase-25, 25);
+
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+        // draw ramp 1
+           context.strokeStyle = '#0a0';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xBase, yBase+80-4*H1);
+           context.lineTo(xBase+4*B1, yBase+80);
+           context.lineTo(xBase+400, yBase+80);
+           context.stroke();
+
+        // draw bell reference lines
+           context.strokeStyle = '#f00';
+           context.lineWidth = 2;
+           context.beginPath();
+           context.moveTo(xBase+4*bellX1, yBase);
+           context.lineTo(xBase+4*bellX1, yBase+80);
+           context.stroke();
+           context.beginPath();
+           context.moveTo(xBase+4*bellX2, yBase);
+           context.lineTo(xBase+4*bellX2, yBase+80);
+           context.stroke();
+           context.beginPath();
+           context.moveTo(xBase+4*bellX3, yBase);
+           context.lineTo(xBase+4*bellX3, yBase+80);
+           context.stroke();
+           context.beginPath();
+           context.moveTo(xBase+4*bellX4, yBase);
+           context.lineTo(xBase+4*bellX4, yBase+80);
+           context.stroke();
+           context.beginPath();
+           context.moveTo(xBase+4*bellX5, yBase);
+           context.lineTo(xBase+4*bellX5, yBase+80);
+           context.stroke();
+
+
+           time = index/200.0;
+
+        // draw ball 1
+           context.strokeStyle = '#00f';
+           context.lineWidth = 2;
+           context.beginPath();
+           if (time < rampTime1) {
+             d1 = 0.5*a1*time*time;
+             x1 = 2*d1*B1/hyp1;
+             y1 = 2*d1*H1/hyp1;
+           }
+           else {
+             x1 = 2*B1+2*v1*(time - rampTime1);
+             if (x1 > 200) x1 = 200;
+             y1 = 2*H1;
+           }
+           context.arc(xBase+2*x1, yBase+80-4*H1-radius-2+2*y1, radius, 0, 2 * Math.PI, false);
+           context.fillStyle = '#00f';
+           context.fill();
+           context.stroke();
+
+        // draw the scenario
+
+ //     console.log("In the drawMotion function, with runFlag = " + runFlag + " x2 = " + x2);
+
+
+           // graph title
+           context.font = 'bold 16pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, (canvas.width)/2, 25);
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+
+        var timeLabel = 't = ';
+        timeLabel = timeLabel + time.toFixed(3) + ' s';
+        context.textAlign = 'left';
+        context.fillText(timeLabel, xBase+400, 40);
+
+
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+  </script>
+
+<p>The simulation beeps each time the ball passes one of the vertical red lines.
+Just like the bells on Galileo's ramp, the positions of three of the vertical red lines can be adjusted.
+The first line and the last line are fixed in place, but the sliders allow you to adjust the positions of the second, third, and fourth lines.
+Move the lines around until the beeps occur at regular time intervals (make sure the sound is on, on your computer or mobile device).
+
+<br><br>
+ <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="./rampa_galileo_files/88x31.png"></a><br>This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br>This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+  
+  </p><p>The counter has been running on this page since 8-9-2018. The number of people accessing the page since then is:
+<br><img src="./rampa_galileo_files/Count.cgi" align="absmiddle">
+
+</p></body><span style="--colorTabBar:var(--colorAccentBg); --colorFg:#222222; --colorFgAlpha:#2222221a; --colorFgIntense:#000000; --colorFgFaded:#545454; --colorFgFadedMore:#727272; --colorFgFadedMost:#9e9e9e; --colorBg:#f6f6f6; --colorBgAlpha:#f6f6f6e6; --colorBgAlphaHeavy:#f6f6f6a6; --colorBgAlphaHeavier:#f6f6f640; --colorBgAlphaBlur:#f6f6f6eb; --colorBgDark:#eeeeee; --colorBgDarker:#e7e7e7; --colorBgLight:#fbfbfb; --colorBgLighter:#ffffff; --colorBgLightIntense:#ffffff; --colorBgIntense:#ffffff; --colorBgIntenser:#ffffff; --colorBgIntserAlpha:#fbfbfbf2; --colorBgInverse:#f1f1f1; --colorBgInverser:#e1e1e1; --colorBgFaded:#e7e7e7; --backgroundBlur:blur(5px); --colorHighlightBg:#4c70f0; --colorHighlightBgUnfocused:#e7e7e7; --colorHighlightBgAlpha:#4c70f01a; --colorHighlightBgDark:#255ad6; --colorHighlightFg:#ffffff; --colorHighlightFgAlpha:#ffffff80; --colorHighlightFgAlphaHeavy:#ffffff40; --colorAccentBg:#ef3939; --colorAccentBgAlpha:#ff7b6d66; --colorAccentBgAlphaHeavy:#ff7b6d40; --colorAccentBgDark:#d81c29; --colorAccentBgDarker:#b50011; --colorAccentBgFaded:#ca443c; --colorAccentBgFadedMore:#ff564e; --colorAccentBgFadedMost:#ff7b6d; --colorAccentBorder:#e32c31; --colorAccentBorderDark:#d51827; --colorAccentFg:#ffffff; --colorAccentFgFaded:#f9c9c9; --colorAccentFgAlpha:#ffffff40; --colorBorder:#dcdcdc; --colorBorderDisabled:#e5e5e5; --colorBorderSubtle:#e3e3e3; --colorBorderIntense:#c8c8c8; --colorSuccessBg:#06a700; --colorSuccessBgAlpha:#06a7001a; --colorSuccessFg:#ffffff; --colorWarningBg:#efaf00; --colorWarningBgAlpha:#efaf001a; --colorWarningFg:#000000; --colorErrorBg:#c64539; --colorErrorBgAlpha:#c645391a; --colorErrorFg:#ffffff; --colorWindowBg:#ef3939; --colorWindowFg:#ffffff; --radiusRound:100px; --radiusRounded:2px; --radiusRoundedLess:2px; --radius:4px; --radiusHalf:2px; --scrollbarWidth:12px; --colorImageCenterFg:rgb(0,0,0); --colorImageCenterFgAlpha:rgba(0,0,0,0.6); --colorImageCenterFgAlphaHeaviest:rgba(0,0,0,0.05); --colorImageCenterBg:rgb(217,220,227); --colorImageCenterBgAlpha:rgba(217,220,227,0.6); --colorImageCenterBgAlphaHeavy:rgba(217,220,227,0.3); --colorImageTopFg:rgb(0,0,0); --colorImageTopFgAlpha:rgba(0,0,0,0.6); --colorImageTopFgAlphaHeaviest:rgba(0,0,0,0.05); --colorImageTopBg:rgb(231,235,242); --colorImageTopBgAlpha:rgba(231,235,242,0.6); --colorImageTopBgAlphaHeavy:rgba(231,235,242,0.3); --colorImageRightFg:rgb(0,0,0); --colorImageRightFgAlpha:rgba(0,0,0,0.6); --colorImageRightFgAlphaHeaviest:rgba(0,0,0,0.05); --colorImageRightBg:rgb(217,220,227); --colorImageRightBgAlpha:rgba(217,220,227,0.6); --colorImageRightBgAlphaHeavy:rgba(217,220,227,0.3); --colorImageBottomFg:rgb(0,0,0); --colorImageBottomFgAlpha:rgba(0,0,0,0.6); --colorImageBottomFgAlphaHeaviest:rgba(0,0,0,0.05); --colorImageBottomBg:rgb(216,219,226); --colorImageBottomBgAlpha:rgba(216,219,226,0.6); --colorImageBottomBgAlphaHeavy:rgba(216,219,226,0.3); --colorImageLeftFg:rgb(0,0,0); --colorImageLeftFgAlpha:rgba(0,0,0,0.6); --colorImageLeftFgAlphaHeaviest:rgba(0,0,0,0.05); --colorImageLeftBg:rgb(228,232,239); --colorImageLeftBgAlpha:rgba(228,232,239,0.6); --colorImageLeftBgAlphaHeavy:rgba(228,232,239,0.3);"></span></html>
