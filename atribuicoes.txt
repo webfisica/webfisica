@@ -1,5 +1,4 @@
-
-
 ERICA -> movimento1d.html
 ELOIZA -> movimento1d_compara.html
 DAYSE -> quedalivre1.html
+WIGNA -> rampa_galileo.html
