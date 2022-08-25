@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-8175315-12"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-12');
+</script>
+
+  <meta charset="utf-8">
+  <title>Constant Acceleration</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:620px; margin-left:auto; margin-right:auto;">
+<center>
+    <canvas id="myCanvas" width="620" height="400"></canvas>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepback" value="<< Step" onclick="stepBack()">
+      <input type="button" id="stepforward" value="Step >>" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+<div id="slider1">Time: 0 s <input type="range" id="indexSlider" min="0" max="200" value="0" step="1" oninput="showSliderValue(this.value)" onchange="showSliderValue(this.value)"> 1 s &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="currentSliderValue">0</div>
+</div>
+<div id="slider2">Mass of green block: 20 g <input type="range" id="massSlider" min="20" max="200" value="50" step="10" oninput="showMassValue(this.value)" onchange="showMassValue(this.value)"> 200 g &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<div id="currentMassValue">50</div>
+</div>
+</center>
+
+  <script>
+
+      function showSliderValue(newValue)
+      {
+             //get the element
+             var display = document.getElementById("currentSliderValue");
+             //show the amount
+             display.innerHTML=newValue/200.0;
+             index = (10*newValue/10.0)-1;
+             time = index/200;
+             tension = m1*m2*g/(m1+m2);
+             a1 = 200*tension/m1;
+             maxTime = Math.sqrt(400.0/a1);
+             maxIndex = Math.round(200.0*maxTime);
+             maxTime = maxIndex/200.0;
+             if (index > maxIndex) {
+               index = maxIndex;
+             }
+             y2 = y2Init;
+             runFlag = 1;
+             drawMotion();
+     }
+
+
+      function showMassValue(newValue)
+      {
+             //get the element
+             var display = document.getElementById("currentMassValue");
+             //show the amount
+             display.innerHTML=newValue;
+             index = 0;
+             m2 = newValue/1000.0;
+             tension = m1*m2*g/(m1+m2);
+             a1 = 200*tension/m1;
+             maxTime = Math.sqrt(400.0/a1);
+             maxIndex = Math.round(200.0*maxTime);
+             maxTime = maxIndex/200.0;
+             reset();
+     }
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        time = index/200;
+        xPos = xBase;
+        y2 = y2Init;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        xPos = xBase;
+        runFlag = 1;
+        y2 = y2Init;
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+      var g = 10.0;
+      var xBase = 140;
+      var yBase = 50;
+      var xInit = 37;
+      var graphType = 1;
+      var graphTitle = 'Motion with constant acceleration';
+      var Message1 = 'Press Reset, then Play,';
+      var Message2 = 'to see the motion again';
+      var cart1Label = 'm';
+      var slope = 0.4;
+      var yIncrement = 10;
+      var yNumDecimals = 0;
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var radius = 10;
+      var x1Init = 300;
+      var x1 = x1Init;
+      var v1 = 0.0;
+      var a1 = 400.0;
+      var m1 = 0.2;
+      var m2 = 0.05;
+      var tension = m2*g;
+      var y1 = yBase + 20;
+      var y2Init = yBase + 80;
+      var y2 = y2Init;
+      var scenario = 1;
+      var maxTime = Math.sqrt(400.0/a1);
+      var maxIndex = Math.round(200.0*maxTime);
+      maxTime = maxIndex/200.0;
+      var time = 0.0;
+      var timer;
+      var runFlag = 1;
+
+      drawMotion();
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if ((index >= 200 ) || (time >= maxTime) || (y2 >= (y2Init+200))) runFlag = 0;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " xPos = " + xPos);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+        // set background color for the entire thing
+           context.fillStyle = "#eef";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // set background color for the graph
+        //   context.fillStyle = "#eff";
+        //   context.fillRect(xBase, yBase, 400, 120);
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+
+         // track
+           context.strokeStyle = '#000';
+           context.lineWidth = 8;
+           context.beginPath();
+           context.moveTo(160, yBase+75);
+           context.lineTo(canvas.width, yBase+75);
+           context.stroke();
+
+        // draw the scenario
+
+           time = index/200.0;
+           if (index > 0.5)
+            { tension = m1*m2*g/(m1+m2); }
+           else { tension = m2*g; }
+           a1 = 200*tension/m1;
+
+          x1 = xBase + x1Init - v1*time - 0.5*a1*time*time;
+          y2 = y2Init + v1*time + 0.5*a1*time*time;
+
+
+          var displayupdate = document.getElementById("currentSliderValue");
+          displayupdate.innerHTML=time;
+          indexSlider.value = index;
+
+          // draw the wheels
+          context.strokeStyle = '#000';
+          context.lineWidth = 2;
+          context.beginPath();
+          context.arc(x1+20, y1+40, radius, 0, 2 * Math.PI, false);
+          context.fillStyle = '#000';
+          context.fill();
+          context.stroke();
+          context.beginPath();
+          context.arc(x1+60, y1+40, radius, 0, 2 * Math.PI, false);
+          context.fillStyle = '#000';
+          context.fill();
+          context.stroke();
+
+          // draw the pulley
+          context.strokeStyle = '#888';
+          context.lineWidth = 2;
+          context.beginPath();
+          context.arc(xBase, y1+30, radius, 0, 2 * Math.PI, false);
+          context.fillStyle = '#000';
+          context.fill();
+          context.stroke();
+
+          // draw the support
+             context.strokeStyle = '#000';
+             context.lineWidth = 4;
+             context.beginPath();
+             context.moveTo(xBase, y1+30);
+             context.lineTo(162, yBase+75);
+             context.stroke();
+
+          // draw the horizontal string
+             context.strokeStyle = '#888';
+             context.lineWidth = 2;
+             context.beginPath();
+             context.moveTo(xBase, y1+20);
+             context.lineTo(x1, y1+20);
+             context.stroke();
+
+          // draw the vertical string
+             context.strokeStyle = '#888';
+             context.lineWidth = 2;
+             context.beginPath();
+             context.moveTo(xBase-10, y1+30);
+             context.lineTo(xBase-10, y2);
+             context.stroke();
+
+
+          // draw the cart
+          context.fillStyle = 'blue';
+          context.lineWidth = 2;
+          context.fillRect(x1, y1, 80, 40);
+
+          // draw the block
+          context.fillStyle = 'green';
+          context.lineWidth = 2;
+          context.fillRect(xBase-25, y2, 30, 30);
+
+          // draw motion sensor
+          context.fillStyle = '#f95';
+          context.lineWidth = 2;
+          context.fillRect(canvas.width-40, y1-1, 30, 52);
+
+          // draw the grid
+             context.strokeStyle = 'red';
+             context.lineWidth = 2;
+          for (var i=0; i<=10; i++)
+           {
+             context.beginPath();
+             context.moveTo(xBase-40, y2Init+29+20*i);
+             context.lineTo(xBase-25, y2Init+29+20*i);
+             context.stroke();
+           }
+          for (i=0; i<=2; i++)
+           {
+             context.beginPath();
+             context.moveTo(xBase-55, y2Init+29+100*i);
+             context.lineTo(xBase-40, y2Init+29+100*i);
+             context.stroke();
+           }
+
+          // grid labels
+             context.font = '14pt Calibri';
+             context.fillStyle = 'black';
+             context.textAlign = 'right';
+             var gridLabel="0 cm"
+             context.fillText(gridLabel, xBase-60,y2Init+34);
+             var gridLabel="50 cm"
+             context.fillText(gridLabel, xBase-60,y2Init+134);
+             var gridLabel="100 cm"
+             context.fillText(gridLabel, xBase-60,y2Init+234);
+
+           // graph title
+           context.font = 'bold 16pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, (canvas.width)/2, 30);
+
+           // message
+           if ((index == 200) || (y2 >= (y2Init+200))) {
+             context.font = '16pt Calibri';
+             context.fillStyle = 'black';
+             context.textAlign = 'left';
+             context.fillText(Message1, xBase+210, 180);
+             context.fillText(Message2, xBase+210, 200);
+            }
+
+
+           // values of time and tension
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           var timeLabel = 't = ';
+           timeLabel = timeLabel + time.toFixed(3) + ' s';
+           context.textAlign = 'left';
+//           context.fillText(timeLabel, 200, 250);
+
+           var tensionLabel = 'Tension = ';
+           tensionLabel = tensionLabel + tension.toFixed(2) + ' N';
+           context.textAlign = 'left';
+//           context.fillText(tensionLabel, 200, 280);
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/30);
+        }
+      }
+
+  </script>
+
+   <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+
+   <p>The counter has been running on this page since 8-10-2018. The number of people accessing the page since then is:
+<br><img src="http://physics.bu.edu/cgi-bin/Count.cgi?df=constant_acceleration_lab.dat" align="absmiddle">
+
+</body>
+</html>
