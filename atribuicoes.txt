@@ -2,6 +2,7 @@
 CLAUDIA -> pousando_um_foguete.html
 MARCIO -> carrinho_balistico.html
 ISABEL -> movimento de projetil.html
+LUIZ -> lab_aceleracao_constante.html
 
 2021.2
 ERICA -> movimento1d.html
