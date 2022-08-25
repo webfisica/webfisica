@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-8175315-12"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-12');
+</script>
+
+  <meta charset="utf-8">
+  <title>Ballistics cart</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:660px; margin-left:auto; margin-right:auto;">
+<center>
+<H3> Ballistics cart</H3>
+</center>
+    <canvas id="myCanvas" width="660" height="300"></canvas>
+<center>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepback" value="<< Step" onclick="stepBack()">
+      <input type="button" id="stepforward" value="Step >>" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+
+    <div id="morebuttons">
+      <input type="button" id="mode1" value="With tunnel" onclick="setMode(1)">
+      <input type="button" id="mode2" value="Without tunnel" onclick="setMode(2)">
+      <input type="button" id="mode3" value="Show velocity vectors" onclick="setMode(3)">
+    </div>
+
+</center>
+
+  <script>
+
+// Simulation first posted on 8-10-2016
+// Update on 8-11-2016 to slow it down by a factor of two.
+
+      function setMode(newMode)
+      {
+             //get the element
+             mode = Number(newMode);
+             reset();
+     }
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        time = index/20;
+        xPos = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        runFlag = 1;
+        drawMotion();
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+
+      var xBase = 100;     // for the motion
+      var yBase = 240;     // for the motion
+      var xInit = 37;
+      var mode = 1;
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var scenario = 1;
+      var g = -10;
+      var radius = 10;
+      var time = 0.0;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+
+      reset();
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if ((index >= 360)) runFlag = 0;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " Fx = " + Fx);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+           time = index/80.0;
+           var yPos = yBase -40*(10*(time-1.0) +0.5*g*(time-1.0)*(time-1.0));
+           var yVel = 10.0 + g*(time-1.0);
+           if (yPos >= yBase) {
+             yPos = yBase;
+             yVel = 0.0;
+           }
+           var xPos = xBase + 100*time;
+//           console.log(time + ' ' + xPos + ' ' + yPos);
+
+// draw the track
+             context.strokeStyle = 'black';
+             context.fillStyle = 'black';
+             context.lineWidth = 4;
+             context.beginPath();
+             context.moveTo(xBase-50,yBase+40);
+             context.lineTo(xBase+500,yBase+40);
+             context.stroke();
+
+// draw the vertical line the ball stays on
+           if (mode == 3) {
+
+             context.strokeStyle = '#aaa';
+             context.lineWidth = 2;
+             context.beginPath();
+             context.moveTo(xPos,yBase);
+             context.lineTo(xPos,yBase-200);
+             context.stroke();
+           }
+
+// draw the ball
+             context.strokeStyle = 'red';
+             context.fillStyle = 'red';
+             context.lineWidth = 2;
+             context.beginPath();
+             context.arc(xPos, yPos, radius, 0, 2 * Math.PI, false);
+             context.fill();
+             context.stroke();
+
+// draw the moving cart
+             context.strokeStyle = 'black';
+             context.fillStyle = 'black';
+             context.lineWidth = 2;
+             context.beginPath();
+             context.arc(xPos-20, yBase+30, radius, 0, 2 * Math.PI, false);
+             context.fill();
+             context.stroke();
+             context.beginPath();
+             context.arc(xPos+20, yBase+30, radius, 0, 2 * Math.PI, false);
+             context.fill();
+             context.stroke();
+             context.fillStyle = "#88f";
+             context.beginPath();
+             context.fillRect(xPos-20, yBase, 40, 25);
+             context.fill();
+             context.beginPath();
+             context.fillRect(xPos-40, yBase+10, 80, 20);
+             context.fill();
+
+// draw the trigger
+             context.strokeStyle = 'black';
+             context.fillStyle = 'black';
+             context.lineWidth = 2;
+             context.beginPath();
+             context.moveTo(xBase+100,yBase+10);
+             context.lineTo(xBase+100,yBase+40);
+             context.stroke();
+
+// draw the tunnel
+           if (mode == 1) {
+             context.fillStyle = "#8f8";
+             context.beginPath();
+             context.fillRect(xBase+150, yBase-20, 120, 58);
+             context.fill();
+           }
+
+           if (mode == 3) {
+             drawArrow(10,0,xPos,yPos,"#a0a");  // x velocity of ball
+             drawArrow(10,0,xPos,yBase,"#a0a");  // x velocity of cart
+             drawArrow(0,yVel,xPos,yPos,"#a0a");  // y velocity of ball
+           }
+
+   }
+}
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+
+    function drawArrow(Fx,Fy,Px,Py, arrowColor) {
+           var theta = Math.atan2(Fy,Fx);
+           context.strokeStyle = arrowColor;
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(Px, Py);
+           context.lineTo(Px+5.0*Fx, Py-5.0*Fy);
+           context.stroke();
+
+           context.lineWidth = 2;
+
+           var Fmag = Math.sqrt(Fx*Fx+Fy*Fy);
+           if (Fmag > 5) Fmag = 5;
+
+           context.fillStyle = arrowColor;
+           context.beginPath();
+           context.moveTo(Px+5.0*Fx-3*Fmag*Math.cos(theta+0.25*(Math.PI/2)),Py-5.0*Fy+3*Fmag*Math.sin(theta+0.25*(Math.PI/2)));
+           context.lineTo(Px+5.0*Fx,Py-5.0*Fy);
+           context.lineTo(Px+5.0*Fx-3*Fmag*Math.cos(theta-0.25*(Math.PI/2)),Py-5.0*Fy+3*Fmag*Math.sin(theta-0.25*(Math.PI/2)));
+
+           context.stroke();
+           context.fill();
+
+    }
+
+  </script>
+
+  <p>The simulation shows a ballistics cart. If the cart is at rest on a horizontal surface, it will shoot a ball straight up in the air, and catch the ball again.
+  What if, as in this simulation, the cart is traveling at a constant velocity horizontally, instead? Will the ball land ahead of the cart, in the cart, or behind the cart? Note that the cart fires the ball straight up, with respect to the cart, when the middle of the cart passes the small vertical trigger on the track.
+  <BR>Use the buttons to select the different modes (whether there is a tunnel or not, and whether to show the velocity vectors).</p>
+
+  <p>Simulation first posted on 8-10-2016. Written by Andrew Duffy
+  <BR>Update by AD on 8-11-2016 (slowed by a factor of 2). </p>
+
+     <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+
+    <p>The counter has been running on this page since 8-10-2018. The number of people accessing the page since then is:
+<br><img src="http://physics.bu.edu/cgi-bin/Count.cgi?df=ballistics_cart.dat" align="absmiddle">
+
+</body>
+</html>
