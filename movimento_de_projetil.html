@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-8175315-12"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-12');
+</script>
+
+  <meta charset="utf-8">
+  <title>Projectile motion</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:800px; margin-left:auto; margin-right:auto;">
+<center>
+<H3> Projectile motion</H3>
+</center>
+    <canvas id="myCanvas" width="800" height="360"></canvas>
+<center>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepback" value="<< Step" onclick="stepBack()">
+      <input type="button" id="stepforward" value="Step >>" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+
+    <div id="gbuttons">Value of g, the gravitational acceleration, in m/s/s
+      <input type="button" id="g2" value="2.0" onclick="setg(2.0)">
+      <input type="button" id="g4" value="4.0" onclick="setg(4.0)">
+      <input type="button" id="g5" value="5.0" onclick="setg(5.0)">
+      <input type="button" id="g10" value="10.0" onclick="setg(10.0)">
+    </div>
+    <div id="vxbuttons">Value of vx, the horizontal velocity, in m/s
+      <input type="button" id="vx1" value="10" onclick="setvx(10.0)">
+      <input type="button" id="vx2" value="20" onclick="setvx(20.0)">
+      <input type="button" id="vx3" value="30" onclick="setvx(30.0)">
+      <input type="button" id="vx4" value="40" onclick="setvx(40.0)">
+      <input type="button" id="vx5" value="50" onclick="setvx(50.0)">
+    </div>
+    <div id="vybuttons">Initial value of vy, the vertical velocity, in m/s
+      <input type="button" id="vy1" value="10" onclick="setvy(10.0)">
+      <input type="button" id="vy2" value="20" onclick="setvy(20.0)">
+      <input type="button" id="vy3" value="30" onclick="setvy(30.0)">
+      <input type="button" id="vy4" value="40" onclick="setvy(40.0)">
+      <input type="button" id="vy5" value="50" onclick="setvy(50.0)">
+    </div>
+    <div id="graphbuttons">Plot on the graph's vertical axis
+      <input type="button" id="graph1" value="y" onclick="chooseGraph(1)">
+      <input type="button" id="graph2" value="vy" onclick="chooseGraph(2)">
+      <input type="button" id="graph3" value="ay" onclick="chooseGraph(3)">
+      <input type="button" id="graph4" value="x" onclick="chooseGraph(4)">
+      <input type="button" id="graph5" value="vx" onclick="chooseGraph(5)">
+      <input type="button" id="graph6" value="ax" onclick="chooseGraph(6)">
+      <input type="button" id="graph7" value="v" onclick="chooseGraph(7)">
+    </div>
+
+</center>
+
+  <script>
+
+// Simulation first posted on 7-30-2016
+// Update 9-26-2017 to add speed graph
+
+      function setg(newg)
+      {
+             //get the element
+             g = Number(newg);
+             reset();
+     }
+
+      function setvx(newvx)
+      {
+             //get the element
+             vxInit = Number(newvx);
+             reset();
+     }
+
+      function setvy(newvy)
+      {
+             //get the element
+             vyInit = Number(newvy);
+             reset();
+     }
+
+      function chooseGraph(graphChoice)
+      {
+             graphType = Number(graphChoice);
+             reset();
+     }
+
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        time = index/20;
+        xPos = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        runFlag = 1;
+        tMax = 2*vyInit/g;
+        xMax = vxInit*tMax;
+        yMax = vyInit*vyInit/(2*g);
+        x2Increment = Math.ceil(tMax/graphX2);
+        yIncrement = 5*Math.ceil(0.2*yMax/(graphY));
+        xIncrement = 5*Math.ceil(0.2*xMax/(graphX));
+        if (graphType == 1) {
+          graph2Title = 'Graph: y vs. t';
+          yAxis2Title = 'y (m)';
+          y2Increment = yIncrement;
+          yAxis2Pos = 0;
+        }
+        if (graphType == 2) {
+          graph2Title = 'Graph: vy vs. t';
+          yAxis2Title = 'vy (m/s)';
+          y2Increment = vyInit/2;
+          yAxis2Pos = 2;
+        }
+        if (graphType == 3) {
+          graph2Title = 'Graph: ay vs. t';
+          yAxis2Title = 'ay (m/s/s)';
+          y2Increment = 5;
+          yAxis2Pos = 2;
+        }
+        if (graphType == 4) {
+          graph2Title = 'Graph: x vs. t';
+          yAxis2Title = 'x (m)';
+          y2Increment = 5*Math.ceil(0.2*xMax/(graphY2));
+          yAxis2Pos = 0;
+        }
+        if (graphType == 5) {
+          graph2Title = 'Graph: vx vs. t';
+          yAxis2Title = 'vx (m/s)';
+          y2Increment = vxInit/2;
+          yAxis2Pos = 2;
+        }
+        if (graphType == 6) {
+          graph2Title = 'Graph: ax vs. t';
+          yAxis2Title = 'ax (m/s/s)';
+          y2Increment = 5;
+          yAxis2Pos = 2;
+        }
+        if (graphType == 7) {
+          graph2Title = 'Graph: v vs. t';
+          yAxis2Title = 'v (m)';
+          y2Increment = Math.max(vxInit,vyInit)/2;
+          yAxis2Pos = 0;
+        }
+
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+
+      var xBase = 494;     // for the graph
+      var xBase2 = 60;   // for the motion
+      var yBase = 70;     // for the graph
+      var yBase2 = 70;    // for the motion
+      var xInit = 37;
+      var graphType = 1;
+      var graphTitle = 'Motion: y vs. x';
+      var graph2Title = 'Graph: y vs. t';
+      var yAxisTitle = 'y (m)';
+      var xAxisTitle = 'x (m)';
+      var yAxis2Title = 'y (m)';
+      var xAxis2Title = 't (s)';
+      var yAxis2Pos = 0;
+      var xIncrement = 30;
+      var xNumDecimals = 0;
+      var yIncrement = 15;
+      var yNumDecimals = 0;
+      var x2Increment = 1;
+      var x2NumDecimals = 0;
+      var y2Increment = 15;
+      var y2NumDecimals = 0;
+      var graphY = 4;
+      var graphX = 8;
+      var graphY2 = 4;
+      var graphX2 = 6;
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var scenario = 1;
+      var g = 10;
+      var vxInit = 30;
+      var vyInit = 30;
+      var tMax = 2*vyInit/g;
+      var xMax = vxInit*tMax;
+      var yMax = vyInit*vyInit/(2*g);
+      var xPos = 0.0;
+      var yPos = 0.0;
+      var radius = 6;
+      var time = 0.0;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+      var graphDistance = 0.0;
+      var graphTime = 0.0;
+      var graphX1 = 0.0;
+      var graphY1 = 0.0;
+      var graphSpeed = 0.0;
+
+      reset();
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if ((index >= 40000) || (time >= tMax)) runFlag = 0;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " Fx = " + Fx);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // set background color for the motion
+           context.fillStyle = "#eff";
+           context.fillRect(xBase2, yBase2, 40*graphX, 40*graphY);
+
+           var axisLabel = '';
+           var axisValue = 0;
+
+// first, draw the axes for the motion
+
+         // vertical grid lines
+         context.lineWidth = 2;
+         context.strokeStyle = '#888';
+
+         for (var i = 0; i <= graphX; i++) {
+           context.beginPath();
+           context.moveTo(xBase2+40*i, yBase2);
+           context.lineTo(xBase2+40*i, yBase2+40*graphY+10);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = xIncrement*(i);
+           axisLabel = axisValue.toFixed(xNumDecimals);
+           context.fillText(axisLabel, xBase2+40*i, yBase2+40*graphY+20);
+          }
+
+         // horizontal grid lines
+         for (i = 0; i <= graphY; i++) {
+           context.beginPath();
+           context.moveTo(xBase2-10, yBase2+40*i);
+           context.lineTo(xBase2+40*graphX, yBase2+40*i);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = yIncrement*(4-i);
+           axisLabel = axisValue.toFixed(yNumDecimals);
+           context.fillText(axisLabel, xBase2-30, yBase2+40*i);
+
+          }
+
+         // x-axis
+           context.strokeStyle = '#000';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xBase2-1, yBase2+40*graphY);
+           context.lineTo(xBase2+40*graphX+20, yBase2+40*graphY);
+           context.stroke();
+           context.moveTo(xBase2+40*graphX+10, yBase2+40*graphY-6);
+           context.lineTo(xBase2+40*graphX+20, yBase2+40*graphY);
+           context.lineTo(xBase2+40*graphX+10, yBase2+40*graphY+6);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'left';
+           context.fillText(xAxisTitle, xBase2+40*graphX+24, yBase2+40*graphY);
+
+         // y-axis
+           context.strokeStyle = '#000';
+           context.beginPath();
+           context.moveTo(xBase2, yBase2-20);
+           context.lineTo(xBase2, yBase2+40*graphY);
+           context.stroke();
+           context.moveTo(xBase2-6, yBase2-10);
+           context.lineTo(xBase2, yBase2-20);
+           context.lineTo(xBase2+6, yBase2-10);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.strokeStyle = '#000';
+           context.textAlign = 'center';
+  //         console.log("In the drawMotion function, with yAxisTitle = " + yAxisTitle + xBase2 );
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.fillText(yAxisTitle, xBase2-30, 35);
+
+// Now, draw the graph axes
+
+        // set background color for the graph
+           context.fillStyle = "#eff";
+           context.fillRect(xBase, yBase, 40*graphX2, 40*graphY2);
+
+
+           context.strokeStyle = '#000';
+           context.lineWidth = 1;
+
+        // vertical grid lines
+         for (var i = 0; i <= graphX2; i++) {
+           context.beginPath();
+           context.moveTo(xBase+40*i, yBase);
+           context.lineTo(xBase+40*i, yBase+40*graphY+10);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = x2Increment*(i);
+           axisLabel = axisValue.toFixed(0);
+           context.fillText(axisLabel, xBase+40*i, yBase+40*graphY+20);
+
+          }
+
+         // horizontal grid lines
+         for (i = 0; i <= graphY2; i++) {
+           context.beginPath();
+           context.moveTo(xBase-10, yBase+40*i);
+           context.lineTo(xBase+40*graphX2, yBase+40*i);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = y2Increment*(4-yAxis2Pos-i);
+
+           axisLabel = axisValue.toFixed(yNumDecimals);
+           context.fillText(axisLabel, xBase-24, yBase+40*i);
+
+
+          }
+
+         // x-axis
+           context.strokeStyle = '#000';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xBase-1, yBase+40*graphY2);
+           context.lineTo(xBase+40*graphX2+20, yBase+40*graphY2);
+           context.stroke();
+           context.moveTo(xBase+40*graphX2+10, yBase+40*graphY2-6);
+           context.lineTo(xBase+40*graphX2+20, yBase+40*graphY2);
+           context.lineTo(xBase+40*graphX2+10, yBase+40*graphY2+6);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'left';
+           context.fillText(xAxis2Title, xBase+40*graphX2+28, yBase+40*graphY2);
+
+
+         // y-axis
+           context.strokeStyle = '#000';
+           context.beginPath();
+           context.moveTo(xBase, yBase-20);
+           context.lineTo(xBase, yBase+40*graphY2);
+           context.stroke();
+           context.moveTo(xBase-6, yBase-10);
+           context.lineTo(xBase, yBase-20);
+           context.lineTo(xBase+6, yBase-10);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.strokeStyle = '#000';
+           context.textAlign = 'center';
+           context.fillText(yAxis2Title, xBase-25, yBase-35);
+
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+           time = index/50.0;
+           xPos = vxInit*time;
+           yPos = vyInit*time - 0.5*g*time*time;
+           var vy = vyInit - g*time;
+ //          console.log(time + ' ' + xPos + ' ' + yPos);
+
+        // draw the trail behind the ball
+           context.lineWidth = 2;
+           context.strokeStyle = '#00f';
+           context.fillStyle = '#00f';
+           context.beginPath();
+           context.moveTo(xBase2, yBase2+40*graphY);
+           for (var i = 1; i<= index; i++) {
+             context.lineTo(xBase2+(vxInit*i/50.0)*40/xIncrement,yBase2+40*graphY-((vyInit*i/50)-(0.5*g*i*i/2500.0))*40/yIncrement);
+           }
+           context.stroke();
+
+// motion diagrams
+           context.beginPath();
+           context.arc(xBase2, yBase2+40*graphY, radius, 0, 2 * Math.PI, false);
+           context.fill();
+           context.stroke();
+           drawArrow(8*vxInit/xIncrement,0,xBase2,yBase2+40*graphY,"red");  // vx
+           drawArrow(0,8*vyInit/yIncrement,xBase2,yBase2+40*graphY,"#080");  // vy
+
+           var counter = 0;
+           for (var i = 1; i<= index; i++) {
+             counter = counter + 1;
+             if (counter == 50) {
+               context.strokeStyle = '#00f';
+               context.fillStyle = '#00f';
+               counter = 0;
+               context.beginPath();
+               context.arc(xBase2+(vxInit*i/50.0)*40/xIncrement, yBase2+40*graphY-((vyInit*i/50)-(0.5*g*i*i/2500.0))*40/yIncrement, radius, 0, 2 * Math.PI, false);
+               context.fill();
+               context.stroke();
+               context.beginPath();
+               context.arc(xBase2+(vxInit*i/50.0)*40/xIncrement, yBase2+40*graphY, radius, 0, 2 * Math.PI, false);
+               context.fill();
+               context.stroke();
+               context.beginPath();
+               context.arc(xBase2, yBase2+40*graphY-((vyInit*i/50)-(0.5*g*i*i/2500.0))*40/yIncrement, radius, 0, 2 * Math.PI, false);
+               context.fill();
+               context.stroke();
+               drawArrow(8*vxInit/xIncrement,0,xBase2+(vxInit*i/50.0)*40/xIncrement,yBase2+40*graphY-((vyInit*i/50)-(0.5*g*i*i/2500.0))*40/yIncrement ,"red");  // vx
+               drawArrow(0,8*(vyInit-(g*i/50.0))/yIncrement,xBase2+(vxInit*i/50.0)*40/xIncrement,yBase2+40*graphY-((vyInit*i/50)-(0.5*g*i*i/2500.0))*40/yIncrement,"#080");  // vy
+
+             }
+           }
+
+
+        // draw the ball in the air
+           context.strokeStyle = '#00f';
+           context.fillStyle = '#00f';
+           context.lineWidth = 2;
+           context.beginPath();
+           context.arc(xBase2+xPos*40/xIncrement, yBase2+40*graphY-yPos*40/yIncrement, radius, 0, 2 * Math.PI, false);
+           context.fill();
+           context.stroke();
+
+        // draw copies on the x and y axes, showing components
+           context.beginPath();
+           context.arc(xBase2+xPos*40/xIncrement, yBase2+40*graphY, radius, 0, 2 * Math.PI, false);
+           context.fill();
+           context.stroke();
+           context.beginPath();
+           context.arc(xBase2, yBase2+40*graphY-yPos*40/yIncrement, radius, 0, 2 * Math.PI, false);
+           context.fill();
+           context.stroke();
+
+
+//         draw the actual graphs
+           context.strokeStyle = "red";
+           context.lineWidth = 4;
+
+           if (graphType == 1) {
+             context.beginPath();
+             context.moveTo(xBase, yBase+40*graphY2);
+             for (var i = 1; i<= index; i++) {
+               context.lineTo(xBase+(i/50.0)*40/x2Increment,yBase+40*graphY-((vyInit*i/50)-(0.5*g*i*i/2500.0))*40/y2Increment);
+             }
+             context.stroke();
+           }
+           if (graphType == 2) {
+             context.beginPath();
+             context.moveTo(xBase, yBase);
+             context.lineTo(xBase+time*40/x2Increment, yBase+40*graphY2/2-vy*40/y2Increment);
+             context.stroke();
+           }
+           if (graphType == 3) {
+             context.beginPath();
+             context.moveTo(xBase, yBase+40*graphY2/2+g*40/y2Increment);
+             context.lineTo(xBase+time*40/x2Increment, yBase+40*graphY2/2+g*40/y2Increment);
+             context.stroke();
+           }
+           if (graphType == 4) {
+             context.beginPath();
+             context.moveTo(xBase, yBase+40*graphY2);
+             context.lineTo(xBase+time*40/x2Increment, yBase+40*graphY2-xPos*40/y2Increment);
+             context.stroke();
+           }
+           if (graphType == 5) {
+             context.beginPath();
+             context.moveTo(xBase, yBase);
+             context.lineTo(xBase+time*40/x2Increment, yBase);
+             context.stroke();
+           }
+           if (graphType == 6) {
+             context.beginPath();
+             context.moveTo(xBase, yBase+40*(graphY2-yAxis2Pos));
+             context.lineTo(xBase+time*40/x2Increment, yBase+40*(graphY2-yAxis2Pos));
+             context.stroke();
+           }
+           if (graphType == 7) {
+             context.beginPath();
+             var v = Math.sqrt(vxInit*vxInit+vyInit*vyInit);
+             context.moveTo(xBase, yBase+40*graphY2-40*v/y2Increment);
+             for (var i = 1; i<= index; i++) {
+               vyNow = vyInit-g*i/50.0;
+               v = Math.sqrt(vxInit*vxInit+vyNow*vyNow);
+               context.lineTo(xBase+(i/50.0)*40/x2Increment,yBase+40*graphY-40*v/y2Increment);
+             }
+             context.stroke();
+           }
+
+        // draw the scenario
+
+ //     console.log("In the drawMotion function, with runFlag = " + runFlag + " x2 = " + x2);
+
+
+           // graph titles
+           context.font = 'bold 16pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, xBase2+160, 35);
+           context.fillText(graph2Title, xBase+140, 35);
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+
+        var timeLabel = 't = ';
+        timeLabel = timeLabel + time.toFixed(2) + ' s';
+        context.textAlign = 'left';
+        context.fillText(timeLabel, xBase2, 300);
+
+        var gLabel = 'g = ';
+        gLabel = gLabel + g.toFixed(1) + ' m/s/s';
+        context.textAlign = 'left';
+        context.fillText(gLabel, xBase2, 330);
+
+        var xLabel = 'x = ';
+        xLabel = xLabel + xPos.toFixed(2) + ' m';
+        context.textAlign = 'left';
+        context.fillText(xLabel, xBase2+125, 300);
+
+        var yLabel = 'y = ';
+        yLabel = yLabel + yPos.toFixed(2) + ' m';
+        context.textAlign = 'left';
+        context.fillText(yLabel, xBase2+250, 300);
+
+        var vxLabel = 'vx = ';
+        vxLabel = vxLabel + vxInit.toFixed(2) + ' m/s';
+        context.textAlign = 'left';
+        context.fillText(vxLabel, xBase2+375, 300);
+
+        var vyLabel = 'vy = ';
+        vyLabel = vyLabel + vy.toFixed(2) + ' m/s';
+        context.textAlign = 'left';
+        context.fillText(vyLabel, xBase2+525, 300);
+
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+
+    function drawArrow(Fx,Fy,Px,Py, arrowColor) {
+           var theta = Math.atan2(Fy,Fx);
+           context.strokeStyle = arrowColor;
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(Px, Py);
+           context.lineTo(Px+5.0*Fx, Py-5.0*Fy);
+           context.stroke();
+
+           context.lineWidth = 2;
+
+           var Fmag = Math.sqrt(Fx*Fx+Fy*Fy);
+           if (Fmag > 5) Fmag = 5;
+
+           context.fillStyle = arrowColor;
+           context.beginPath();
+           context.moveTo(Px+5.0*Fx-3*Fmag*Math.cos(theta+0.25*(Math.PI/2)),Py-5.0*Fy+3*Fmag*Math.sin(theta+0.25*(Math.PI/2)));
+           context.lineTo(Px+5.0*Fx,Py-5.0*Fy);
+           context.lineTo(Px+5.0*Fx-3*Fmag*Math.cos(theta-0.25*(Math.PI/2)),Py-5.0*Fy+3*Fmag*Math.sin(theta-0.25*(Math.PI/2)));
+
+           context.stroke();
+           context.fill();
+
+    }
+
+  </script>
+
+  <p>The simulation shows a ball experiencing projectile motion, as well as various
+  graphs associated with the motion.
+  <BR>Use the buttons to select different values of g (the acceleration due to gravity),
+  the horizontal component of the initial velocity, the vertical component of the initial
+  velocity, and what to plot on the vertical axis of the graph (on the right).</p>
+  <BR>A motion diagram is drawn, with images of the ball being placed on the diagram at 1-second intervals.
+  <BR>The numbers have been chosen so the motion diagram is always symmetric (the images of the ball on the y-axis
+  on the way up are always the same locations as the images of the ball on the way down), and the time for
+  the entire trip is always an integer number of seconds. (It should be obvious that this will not
+  always happen in reality!)</p>
+  <p>The arrows attached to the ball are the horizontal and vertical components of the velocity.</p>
+
+  <p>Simulation first posted on 7-30-2016. Written by Andrew Duffy
+  <BR>Updated 9-26-2017 (added speed graph) by AD</p>
+
+
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+
+ <p>The counter has been running on this page since 8-10-2018. The number of people accessing the page since then is:
+<br><img src="http://physics.bu.edu/cgi-bin/Count.cgi?df=projectile_motion.dat" align="absmiddle">
+
+</body>
+</html>
