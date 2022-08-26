@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-8175315-11"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-11');
+</script>
+
+  <meta charset="utf-8">
+  <title>Normal force</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:500px; margin-left:auto; margin-right:auto;">
+<center>
+<H3> Exploring the normal force</H3>
+</center>
+    <canvas id="myCanvas" width="500" height="300"></canvas>
+<center>
+     <div>Applied force (positive up)</div>
+     <div id="slider1">
+      -10 N <input type="range" id="FValue" min="-10" max="10" value="2.0" step="1.0" oninput="showF(this.value)" onchange="showF(this.value)"> +10 N
+<div id="initialFValue">2</div>
+    </div>
+
+         <div>Weight of the box</div>
+     <div id="slider2">
+      10 N <input type="range" id="FValue" min="10" max="20" value="12.0" step="1.0" oninput="showW(this.value)" onchange="showW(this.value)"> +20 N
+<div id="initialWValue">12</div>
+    </div>
+
+
+</center>
+
+  <script>
+
+
+      function showF(newValue)
+      {
+             //get the element
+             var display = document.getElementById("initialFValue");
+             //show the amount
+             display.innerHTML=newValue;
+             F = Number(newValue);
+             reset();
+     }
+
+           function showW(newValue)
+      {
+             //get the element
+             var display = document.getElementById("initialWValue");
+             //show the amount
+             display.innerHTML=newValue;
+             W = Number(newValue);
+             reset();
+     }
+
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        FN = W - F;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+      var xBase = 320;
+      var yBase = 150;
+      var xInit = 37;
+      var graphType = 1;
+      var graphTitle = 'Exploring the normal force';
+      var yAxisTitle = 'omega (rad/s)';
+      var xAxisTitle = 't (s)';
+      var yIncrement = 20;
+      var yNumDecimals = 1;
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var scenario = 1;
+      var F = 2.0;
+      var W = 12;           // weight of the box
+      var FN = W - F;
+      var mgColor = '#393';
+      var FNColor = '#939';
+      var FColor = '#339';
+      var time = 0.0;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+
+      reset();
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if (index >= 400) runFlag = 0;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " Fx = " + Fx);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+
+        // set line color
+           context.strokeStyle = 'black';
+           context.lineWidth = 2;
+           context.beginPath();
+           context.moveTo(xBase-180-30, yBase+40+1);
+           context.lineTo(xBase-180+70, yBase+40+1);
+           context.stroke();
+
+
+         // draw the box
+           context.strokeStyle = '#00b';
+           context.fillStyle = "#ccf";
+           context.fillRect(xBase, yBase, 40, 40);
+           context.fillRect(xBase-180, yBase, 40, 40);
+
+         // draw the mg arrow
+         drawArrow(0,-W,xBase+10,yBase+20,1.5*3.1416,mgColor);
+
+         // draw the FN arrow
+         drawArrow(0,FN,xBase+30,yBase+40,0.5*3.1416,FNColor);
+
+         // draw the applied force arrow
+         if (F > 0) {
+           drawArrow(0,F,xBase+20,yBase,0.5*3.1416,FColor);
+           drawArrow(0,F,xBase+20-180,yBase,0.5*3.1416,FColor);
+         }
+         if (F < 0) {
+           drawArrow(0,F,xBase+20,yBase,1.5*3.1416,FColor);
+           drawArrow(0,F,xBase+20-180,yBase,1.5*3.1416,FColor);
+         }
+
+        // draw the scenario
+
+ //     console.log("In the drawMotion function, with runFlag = " + runFlag + " x2 = " + x2);
+
+
+           // graph title
+           context.font = 'bold 16pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+//           context.fillText(graphTitle, 120+(canvas.width)/2, 70);
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+
+          context.fillStyle = mgColor;
+          var forceLabel = 'mg';
+          context.textAlign = 'left';
+          context.fillText(forceLabel, xBase-24,yBase+54);
+
+          if (F != 0) {
+            context.fillStyle = FColor;
+            forceLabel = "F";
+            context.fillText(forceLabel, xBase+20-180+10,yBase-5*F);
+            context.font = 'bold 12pt Calibri';
+            forceLabel = "applied";
+            context.fillText(forceLabel, xBase+20-180+18,yBase-5*F+6);
+          }
+
+          if (FN != 0) {
+            context.font = 'bold 16pt Calibri';
+            context.fillStyle = FNColor;
+            forceLabel = "F";
+            context.fillText(forceLabel, xBase+30+10,yBase+30);
+            context.font = 'bold 12pt Calibri';
+            forceLabel = "N";
+            context.fillText(forceLabel, xBase+30+10+8, yBase+30+6);
+          }
+
+      }
+    }
+
+    function drawArrow(Fx,Fy,Px,Py,theta, arrowColor) {
+           context.strokeStyle = arrowColor;
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(Px, Py);
+           context.lineTo(Px+5*Fx,Py-5*Fy);
+ //          context.lineTo(120+50*Fx*Math.cos(theta)+10*F*Math.cos(theta+(3.1416/2))-2*F*Math.cos(theta+0.7*(3.1416/2)),170-50*Fx*Math.sin(theta)-10*F*Math.sin(theta+(3.1416/2))+2*F*Math.sin(theta+0.7*(3.1416/2)));
+           context.stroke();
+
+           context.lineWidth = 2;
+
+           var Fmag = Math.sqrt(Fx*Fx+Fy*Fy);
+           if (Fmag > 5) Fmag = 5;
+
+           context.fillStyle = arrowColor;
+           context.beginPath();
+           context.moveTo(Px+5*Fx-3*Fmag*Math.cos(theta+0.25*(3.1416/2)),Py-5*Fy+3*Fmag*Math.sin(theta+0.25*(3.1416/2)));
+           context.lineTo(Px+5*Fx,Py-5*Fy);
+           context.lineTo(Px+5*Fx-3*Fmag*Math.cos(theta-0.25*(3.1416/2)),Py-5*Fy+3*Fmag*Math.sin(theta-0.25*(3.1416/2)));
+           context.stroke();
+           context.fill();
+
+    }
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+  </script>
+
+  <p>In this simulation, you see, on the left, a picture of a box at rest on a table. You can apply a vertical force (up or down) to the box.
+  On the right, you can see the full free-body diagram of the box. The free-body diagram shows the gravitational force (green) exerted on the box by the Earth,
+  the normal force (purple) exerted by the table, and the vertical force (dark blue) that you apply. Note that, on the free-body diagram, all three forces are along the
+  vertical line passing through the center of the box, but the force of gravity and the normal force have been shifted a little so they can be seen
+  more easily.</p>
+
+<p> Simulation by Andrew Duffy. Amended on 8-16-2016 to include labels on the force vectors.</p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+
+       <p>The counter has been running on this page since 8-10-2018. The number of people accessing the page since then is:
+<br><img src="http://physics.bu.edu/cgi-bin/Count.cgi?df=normal_force.dat" align="absmiddle">
+
+</body>
+</html>
