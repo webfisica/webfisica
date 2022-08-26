@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-8175315-11"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-11');
+</script>
+
+  <meta charset="utf-8">
+  <title>Elevator physics</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:640px; margin-left:auto; margin-right:auto;">
+<center>
+<H3> Elevator physics</H3>
+</center>
+    <canvas id="myCanvas" width="640" height="400"></canvas>
+<center>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepback" value="<< Step" onclick="stepBack()">
+      <input type="button" id="stepforward" value="Step >>" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+
+    <div id="FBDbuttons">
+      <input type="button" id="FBD1" value="Hide the free-body diagrams" onclick="setMode(1)">
+      <input type="button" id="FBD2" value="Show the free-body diagrams" onclick="setMode(2)">
+    </div>
+
+</center>
+
+  <script>
+
+// Simulation first posted on 8-16-2016
+
+      function setMode(newMode)
+      {
+             //get the element
+             mode = Number(newMode);
+             reset();
+     }
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+//        time = index/20;
+//        xPos = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -51;
+        time = -0.5;
+        yPos = 0.0;
+        vy = 0.0;
+        a = 1.0;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+
+      var xBase = 70;     // for the motion
+      var yBase = 240;     // for the motion
+      var xInit = 37;
+      var graphType = 1;
+      var graphTitle = 'Elevator physics';
+      var graph2Title = 'Acceleration is up';
+      var yAxisTitle = 'y (m)';
+      var xAxisTitle = 'x (m)';
+      var yAxis2Title = 'y (m)';
+      var xAxis2Title = 't (s)';
+      var yAxis2Pos = 0;
+      var xIncrement = 30;
+      var xNumDecimals = 0;
+      var yIncrement = 30;
+      var yNumDecimals = 0;
+      var graphY = 4;
+      var graphX = 10;
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var scenario = 1;
+      var vxInit = 40;
+      var vyFactor = 0.33;
+      var vyInit = vyFactor*vxInit;
+      var xPos = 0.0;
+      var yPos = 0.0;
+      var vy = 0;
+      var g = 10;
+      var a = 2;
+      var mode = 1;
+      var radius = 6;
+      var time = -0.5;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+      var graphDistance = 0.0;
+      var graphTime = 0.0;
+      var graphX1 = 0.0;
+      var graphY1 = 0.0;
+      var graphSpeed = 0.0;
+
+      reset();
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if ((index >= 1000) || (time >= 3.5)) runFlag = 0;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " Fx = " + Fx);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+           var axisLabel = '';
+           var axisValue = 0;
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+           time = index/100.0;
+           yPos = 0.0;
+           a = 2.0;
+           graph2Title = 'Acceleration is up';
+           yPos = 40*0.5*a*time*time;
+           vy = a*time;
+           if (time >= 1.0) {
+             vy = a*1.0;
+             yPos = 40*0.5*a;
+             a = 0.0;
+             yPos = yPos + 40*vy*(time-1.0);
+             graph2Title = 'Acceleration is zero';
+           }
+           if (time >= 2.0) {
+             a = -2.0;
+             yPos = 40*0.5*2.0 + 40*2.0*1.0*1.0;
+             vy = 2.0;
+             yPos = yPos + 40*vy*(time-2.0) + 40*0.5*a*(time-2.0)*(time-2.0);
+             vy = vy +a*(time-2.0);
+             graph2Title = 'Acceleration is down';
+           }
+
+           if (time >= 3.0) {
+             a = -2.0;
+             yPos = 40*0.5*2.0 + 40*2.0*1.0*1.0;
+             vy = 2.0;
+             yPos = yPos + 40*vy*(3.0-2.0) + 40*0.5*a*(3.0-2.0)*(3.0-2.0);
+             vy = 0.0;
+             a = 0.0;
+             graph2Title = 'The system is at rest';
+           }
+
+           if (time <= 0.0) {
+             yPos = 0.0;
+             vy = 0.0;
+             a = 0.0;
+             graph2Title = 'The system is at rest';
+           }
+
+ //          console.log(time + ' ' + yPos);
+
+
+        // draw the elevator
+           context.strokeStyle = 'blue';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.strokeRect(xBase-40, yBase - yPos, 80, 140);
+
+           context.beginPath();
+           context.strokeRect(xBase-40+300, yBase-80, 80, 140);
+
+           context.beginPath();
+           context.strokeRect(xBase-40+440, yBase-80, 80, 140);
+
+        // draw the cable
+           context.strokeStyle = 'black';
+           context.beginPath();
+           context.moveTo(xBase, yBase - yPos);
+           context.lineTo(xBase, yBase - yPos-80);
+           context.lineTo(xBase, 0);
+           context.stroke();
+
+        // draw the person
+           context.strokeStyle = '#faa';
+           context.fillStyle = '#faa';
+           context.lineWidth = 2;
+           context.beginPath();
+           context.fillRect(xBase-16, yBase-yPos+58, 32, 80);
+
+           context.beginPath();
+           context.fillRect(xBase-16+160, yBase-80+58, 32, 80);
+
+           context.beginPath();
+           context.fillRect(xBase-16+440, yBase-80+58, 32, 80);
+
+        if (mode == 2) {
+        // draw the free-body diagram of the person
+             drawArrow(0,-6,xBase+160, yBase+58,"green");  // mg
+             drawArrow(0,0.6*(10+a),xBase+160, yBase-22,"blue");  // normal
+
+        // draw the free-body diagram of the elevator
+             drawArrow(0,-12,xBase+300-10, yBase+58,"green");  // Mg
+             drawArrow(0,-0.6*(10+a),xBase+300+10, yBase+58,"blue");  // normal
+             drawArrow(0,1.8*(10+a),xBase+300, yBase-80,"black");  // tension
+
+        // draw the free-body diagram of the elevator-person system
+             drawArrow(0,-18,xBase+440, yBase+58,"green");  // mg + Mg
+             drawArrow(0,1.8*(10+a),xBase+440, yBase-80,"black");  // tension
+        }
+
+ //     console.log("In the drawMotion function, with runFlag = " + runFlag + " x2 = " + x2);
+
+
+           // graph titles
+           context.font = 'bold 16pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, xBase+180, 35);
+           context.fillText(graph2Title, xBase+180, 65);
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+
+        if (mode == 2) {
+          context.fillStyle = 'green';
+          var forceLabel = 'mg';
+          context.textAlign = 'left';
+          context.fillText(forceLabel, xBase+160-35, yBase+58+30);
+          forceLabel = "Mg";
+          context.fillText(forceLabel, xBase+300-45, yBase+58+30);
+          forceLabel = "mg + Mg";
+          context.fillText(forceLabel, xBase+440+5, yBase+58+50);
+
+          context.fillStyle = 'blue';
+          forceLabel = "F";
+          context.fillText(forceLabel, xBase+160+10, yBase-40);
+          context.fillText(forceLabel, xBase+300+18, yBase+58+30);
+          context.font = 'bold 12pt Calibri';
+          forceLabel = "N";
+          context.fillText(forceLabel, xBase+160+10+8, yBase-40+6);
+          context.fillText(forceLabel, xBase+300+18+8, yBase+58+30+6);
+
+          context.font = 'bold 16pt Calibri';
+          context.fillStyle = 'black';
+          forceLabel = "F";
+          context.fillText(forceLabel, xBase+300+10, yBase-120);
+          context.fillText(forceLabel, xBase+440+10, yBase-120);
+          context.font = 'bold 12pt Calibri';
+          forceLabel = "T";
+          context.fillText(forceLabel, xBase+300+10+9, yBase-120+7);
+          context.fillText(forceLabel, xBase+440+10+9, yBase-120+7);
+        }
+
+
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+
+    function drawArrow(Fx,Fy,Px,Py, arrowColor) {
+           var theta = Math.atan2(Fy,Fx);
+           context.strokeStyle = arrowColor;
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(Px, Py);
+           context.lineTo(Px+5.0*Fx, Py-5.0*Fy);
+           context.stroke();
+
+           context.lineWidth = 2;
+
+           var Fmag = Math.sqrt(Fx*Fx+Fy*Fy);
+           if (Fmag > 5) Fmag = 5;
+
+           context.fillStyle = arrowColor;
+           context.beginPath();
+           context.moveTo(Px+5.0*Fx-3*Fmag*Math.cos(theta+0.25*(Math.PI/2)),Py-5.0*Fy+3*Fmag*Math.sin(theta+0.25*(Math.PI/2)));
+           context.lineTo(Px+5.0*Fx,Py-5.0*Fy);
+           context.lineTo(Px+5.0*Fx-3*Fmag*Math.cos(theta-0.25*(Math.PI/2)),Py-5.0*Fy+3*Fmag*Math.sin(theta-0.25*(Math.PI/2)));
+
+           context.stroke();
+           context.fill();
+
+    }
+
+  </script>
+
+  <p>The simulation illustrates the situation of a person in an elevator. The elevator takes the person from one floor to the next floor up.
+  <BR>For this situation, try sketching three free-body diagrams, one for the person, another for the elevator, and a third for the person-elevator system.
+  <BR>First, draw the diagrams for when the system remains at rest. Then, predict whether the free-body diagrams will change (and, if so, how) when the elevator is accelerating up, moving up at constant velocity, and moving up but slowing down (acceleration is down).</p>
+  <p>The simulation draws the diagrams for all these cases, but make sure you try drawing your own before looking at the simulation's diagrams. </p>
+
+  <p>Simulation first posted on 8-16-2016. Written by Andrew Duffy</p>
+
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+  
+      <p>The counter has been running on this page since 8-10-2018. The number of people accessing the page since then is:
+<br><img src="http://physics.bu.edu/cgi-bin/Count.cgi?df=elevator_physics.dat" align="absmiddle">
+
+</body>
+</html>
