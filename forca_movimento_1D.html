@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-8175315-11"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-11');
+</script>
+
+  <meta charset="utf-8">
+  <title>Force and motion</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; margin-left:10; margin-right:10;">
+<center>
+	<div id="canvasesdiv" style="position:relative; display:block; margin:auto; width:580px; height:300px"></div>
+    <canvas id="myCanvas" style="display: block; position: absolute; margin: 0 auto;display: block;
+        position: absolute; margin: 0 auto; top: 0; bottom: 0; left: 0; right: 0;" width="580" height="300"></canvas>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepforward" value="Step >>" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+
+</center>
+
+  <script>
+
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+        runFlag = 0;
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        runFlag = 1;
+        drawMotion();
+        runFlag = 0;
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        x = 0;
+        v = 0;
+        msliderValue = msliderValueMin + (msliderValueMax-msliderValueMin)*(msliderX-msliderXMin)/(msliderXMax-msliderXMin);
+        m = msliderValue;
+        forcesliderValue = forcesliderValueMin + (forcesliderValueMax-forcesliderValueMin)*(forcesliderX-forcesliderXMin)/(forcesliderXMax-forcesliderXMin);
+        force = forcesliderValue;
+        runFlag = 1;
+        drawMotion();
+        runFlag = 0;
+      }
+
+
+      function drawVectors() {
+           drawArrow(-4.0*v*Math.sin(omega*time),4.0*v*Math.cos(omega*time),xSupport+length*rodLength*Math.cos(omega*time),ySupport-length*rodLength*Math.sin(omega*time),"blue");   // velocity
+           drawArrow(-1.2*v*(v/length)*Math.cos(omega*time),-1.2*v*(v/length)*Math.sin(omega*time),xSupport+length*rodLength*Math.cos(omega*time),ySupport-length*rodLength*Math.sin(omega*time),"green");   // radial component of mg
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      canvas.onmousedown = myDown;							// mouse event handler for computer browsers
+	  canvas.onmouseup = myUp;								// mouse event handler for computer browsers
+	  canvas.addEventListener("touchstart", myTouchStart, false);	// touch handler for iPhones, iPads, and Androids
+	  canvas.addEventListener("touchmove", myTouchMove, false);	// touch handler for iPhones, iPads, and Androids
+	  canvas.addEventListener("touchend", myTouchEnd, false);		// touch handler for iPhones, iPads, and Androids
+      var myCheck = document.getElementById("myCheck");
+      var index = -1;
+      var xBase = 300;
+      var yBase = 160;
+      var xSupport = canvas.width/2;
+      var ySupport = yBase;
+      var xInit = 37;
+      var graphX = 10;
+      var graphY = 4;
+      var graphType = 1;
+      var xAxisOffset = 0.0;
+      var xMajorTicks = 1;
+      var xDecimals = 0;
+      var graphLabel = 'Angular position vs. time';
+      var xAxisLabel = 't (s)';
+      var yAxisLabel = 'theta (rad)';
+      var slope = 0.4;
+      var yMajorTicks = 0.2;
+      var yDecimals = 1;
+      var yStart = yBase+160;
+      var plotColor = '#ff00ff';
+      var radius = 3;
+      var time = 0.0;
+      var thetaInit = 15.0*Math.PI/180.0;
+      var x = 0.0;
+      var v = 0.0;
+      var a;
+      var m = 2.0;
+      var boxSize = 40*Math.sqrt(m);
+      var force = 0.0;
+      var rodLength = 90;
+      var radius = 3;
+      var xPos;
+      var yPos;
+      var timer;
+      var runFlag = 1;
+
+      var msliderX = 90;
+      var msliderY = 270;
+      var msliderXMin = 40;
+      var msliderXMax = 240;
+      var msliderValueMin = 1.0;
+      var msliderValueMax = 5.0;
+      var msliderValue = m;
+      var msliderDecimals = 1.0;
+
+      var forcesliderX = 420;
+      var forcesliderY = 270;
+      var forcesliderXMin = 320;
+      var forcesliderXMax = 520;
+      var forcesliderValueMin = -20.0;
+      var forcesliderValueMax = 20.0;
+      var forcesliderValue = force;
+      var forcesliderDecimals = 1.0;
+
+
+     var forceArrowColor = '#393';
+      var vArrowColor = '#d63';
+
+
+      drawMotion();
+      runFlag = 0;
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if ((time >= 10000.0)) runFlag = 0;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " xPos = " + xPos);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+           msliderValue = msliderValueMin + (msliderValueMax-msliderValueMin)*(msliderX-msliderXMin)/(msliderXMax-msliderXMin);
+           m = msliderValue;
+           forcesliderValue = forcesliderValueMin + (forcesliderValueMax-forcesliderValueMin)*(forcesliderX-forcesliderXMin)/(forcesliderXMax-forcesliderXMin);
+           force = forcesliderValue;
+
+       // draw mass slider
+
+           drawSlider(msliderX, msliderY, msliderXMin, msliderXMax, msliderValueMin, msliderValueMax, msliderValue, msliderDecimals);
+           var sLabel = 'mass = ';
+           sLabel = sLabel + msliderValue.toFixed(msliderDecimals) + ' kg';
+           context.font = '16pt Calibri';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           context.fillStyle = 'black';
+           context.fillText(sLabel,msliderXMin+0.5*(msliderXMax-msliderXMin), msliderY-25);
+
+
+       // draw force slider
+
+           drawSlider(forcesliderX, forcesliderY, forcesliderXMin, forcesliderXMax, forcesliderValueMin, forcesliderValueMax, forcesliderValue, forcesliderDecimals);
+           var sLabel = 'Force = ';
+           sLabel = sLabel + forcesliderValue.toFixed(forcesliderDecimals) + ' N';
+           context.font = '16pt Calibri';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           context.fillStyle = 'black';
+           context.fillText(sLabel,forcesliderXMin+0.5*(forcesliderXMax-forcesliderXMin), forcesliderY-25);
+
+
+
+        index = index + 1;
+        time = index/100.0;
+        deltat = 1/100.0;
+        numIterations = 100;
+        dt = deltat / numIterations;
+        if (index > 0) {
+          for (i = 1; i <= numIterations; i++) {
+            a = force/m;
+            v = v + a*dt;
+            x = x + v*dt;
+           }
+         }
+//        console.log(index + "  x = " + position + " v = " + velocity + " a = " + acceleration);
+
+
+          if (x > 8.5) {
+           x = x - 17.0;
+          }
+          else if (x < -8.5) { x = x + 17.0; }
+
+           xPos = canvas.width/2 + 40*x;
+           boxSize = 40*Math.sqrt(m);
+         // draw the box
+           context.beginPath();
+           context.fillStyle = "#6af";
+           context.fillRect(xPos-boxSize/2, yBase-boxSize, boxSize, boxSize);
+
+           // draw table
+
+           context.strokeStyle = 'black';
+           context.lineWidth = 2;
+           context.beginPath();
+           context.moveTo(0,yBase);
+           context.lineTo(canvas.width,yBase);
+           context.stroke();
+
+         // draw the normal force arrow
+           drawArrow(0,4*m,xPos,yBase-boxSize/2-10,"blue");
+
+           context.font = 'bold 20pt Calibri';
+           context.fillStyle = "blue";
+           context.textAlign = 'center';
+           context.fillText("F", xPos + 16, yBase-boxSize-20);
+           context.font = 'bold 14pt Calibri';
+           context.fillText("N", xPos + 28, yBase-boxSize-12);
+
+
+         // draw the mg arrow
+           drawArrow(0,-4*m,xPos,yBase-boxSize/2+10,"#282");
+
+           context.font = 'bold 20pt Calibri';
+           context.fillStyle = "#282";
+           context.textAlign = 'center';
+           context.fillText("F", xPos + 16, yBase+20);
+           context.font = 'bold 14pt Calibri';
+           context.fillText("g", xPos + 28, yBase+28);
+
+
+         // draw the force arrow
+           drawArrow(0.4*force,0,xPos,yBase-boxSize/2,"#c00");
+
+           if (Math.abs(force) > 0.01) {
+             context.font = 'bold 20pt Calibri';
+             context.fillStyle = "#c00";
+             context.textAlign = 'center';
+             context.fillText("F", xPos + (5+2*Math.abs(force))*force/Math.abs(force), yBase-boxSize/2+12);
+           }
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+
+
+        var timeLabel = 't = ';
+        timeLabel = timeLabel + time.toFixed(2) + ' s';
+        context.textAlign = 'center';
+        context.fillText(timeLabel, 100, 20);
+
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 300/30);
+        }
+      }
+
+    function drawArrow(Fx,Fy,Px,Py, arrowColor) {
+           var theta = Math.atan2(Fy,Fx);
+           context.strokeStyle = arrowColor;
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(Px, Py);
+           context.lineTo(Px+5*Fx, Py-5*Fy);
+           context.stroke();
+
+           context.lineWidth = 2;
+
+           var Fmag = Math.sqrt(Fx*Fx+Fy*Fy);
+           if (Fmag > 5) Fmag = 5;
+
+           context.fillStyle = arrowColor;
+           context.beginPath();
+           context.moveTo(Px+5*Fx-3*Fmag*Math.cos(theta+0.25*(3.1416/2)),Py-5*Fy+3*Fmag*Math.sin(theta+0.25*(3.1416/2)));
+           context.lineTo(Px+5*Fx,Py-5*Fy);
+           context.lineTo(Px+5*Fx-3*Fmag*Math.cos(theta-0.25*(3.1416/2)),Py-5*Fy+3*Fmag*Math.sin(theta-0.25*(3.1416/2)));
+
+           context.stroke();
+           context.fill();
+
+    }
+
+    function drawAxes(xAxisStart,yAxisStart,xNum, yNum, xOffset, xIncrement, yIncrement, xNumDecimals, yNumDecimals, xAxisTitle, yAxisTitle, graphTitle) {
+        // set background color for the graph
+           context.fillStyle = "#eff";
+           context.fillRect(xAxisStart, yAxisStart, 40*xNum, 40*yNum);
+
+           var axisLabel = '';
+           var axisValue = 0;
+
+         // vertical grid lines
+         context.lineWidth = 2;
+         context.strokeStyle = '#888';
+
+         for (var i = 0; i <= xNum; i++) {
+           context.beginPath();
+           context.moveTo(xAxisStart+40*i, yAxisStart);
+           context.lineTo(xAxisStart+40*i, yAxisStart+40*yNum+10);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = xOffset+xIncrement*(i);
+           axisLabel = axisValue.toFixed(xNumDecimals);
+           context.fillText(axisLabel, xAxisStart+40*i, yAxisStart+40*yNum+20);
+          }
+
+         // horizontal grid lines
+         for (i = 0; i <= yNum; i++) {
+           context.beginPath();
+           context.moveTo(xAxisStart-10, yAxisStart+40*i);
+           context.lineTo(xAxisStart+40*xNum, yAxisStart+40*i);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = yIncrement*(yNum-i);
+           axisLabel = axisValue.toFixed(yNumDecimals);
+           context.fillText(axisLabel, xAxisStart-30, yAxisStart+40*i);
+
+          }
+
+         // x-axis
+           context.strokeStyle = '#000';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xAxisStart-1, yAxisStart+40*yNum);
+           context.lineTo(xAxisStart+40*xNum+20, yAxisStart+40*yNum);
+           context.stroke();
+           context.moveTo(xAxisStart+40*xNum+10, yAxisStart+40*yNum-6);
+           context.lineTo(xAxisStart+40*xNum+20, yAxisStart+40*yNum);
+           context.lineTo(xAxisStart+40*xNum+10, yAxisStart+40*yNum+6);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'left';
+           context.fillText(xAxisTitle, xAxisStart+40*xNum+24, yAxisStart+40*yNum);
+
+         // y-axis
+           context.strokeStyle = '#000';
+           context.beginPath();
+           context.moveTo(xAxisStart, yAxisStart-20);
+           context.lineTo(xAxisStart, yAxisStart+40*yNum);
+           context.stroke();
+           context.moveTo(xAxisStart-6, yAxisStart-10);
+           context.lineTo(xAxisStart, yAxisStart-20);
+           context.lineTo(xAxisStart+6, yAxisStart-10);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.strokeStyle = '#000';
+           context.textAlign = 'center';
+  //         console.log("In the drawMotion function, with yAxisTitle = " + yAxisTitle + xAxisStart );
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.fillText(yAxisTitle, xAxisStart-30, yAxisStart - 35);
+
+           // graph title
+           context.font = 'bold 18pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, xAxisStart+40*xNum/2, yAxisStart-24);
+
+    }
+
+    function drawAxesMidY(xAxisStart,yAxisStart,xNum, yNum, xOffset, xIncrement, yIncrement, xNumDecimals, yNumDecimals, xAxisTitle, yAxisTitle, graphTitle) {
+        // set background color for the graph
+           context.fillStyle = "#eff";
+           context.fillRect(xAxisStart, yAxisStart, 40*xNum, 40*yNum);
+
+           var axisLabel = '';
+           var axisValue = 0;
+
+         // vertical grid lines
+         context.lineWidth = 2;
+         context.strokeStyle = '#888';
+
+         for (var i = 0; i <= xNum; i++) {
+           context.beginPath();
+           context.moveTo(xAxisStart+40*i, yAxisStart);
+           context.lineTo(xAxisStart+40*i, yAxisStart+40*yNum/2+10);
+           context.stroke();
+           context.moveTo(xAxisStart+40*i, yAxisStart+40*yNum/2+30);
+           context.lineTo(xAxisStart+40*i, yAxisStart+40*yNum);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = xOffset + xIncrement*(i);
+           axisLabel = axisValue.toFixed(xNumDecimals);
+           if (i > 0) context.fillText(axisLabel, xAxisStart+40*i, yAxisStart+40*yNum/2+20);
+          }
+
+         // horizontal grid lines
+         for (i = 0; i <= yNum; i++) {
+           context.beginPath();
+           context.moveTo(xAxisStart-10, yAxisStart+40*i);
+           context.lineTo(xAxisStart+40*xNum, yAxisStart+40*i);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = yIncrement*(yNum/2-i);
+           axisLabel = axisValue.toFixed(yNumDecimals);
+           context.fillText(axisLabel, xAxisStart-30, yAxisStart+40*i);
+
+          }
+
+         // x-axis
+           context.strokeStyle = '#000';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xAxisStart-1, yAxisStart+40*yNum/2);
+           context.lineTo(xAxisStart+40*xNum+20, yAxisStart+40*yNum/2);
+           context.stroke();
+           context.moveTo(xAxisStart+40*xNum+10, yAxisStart+40*yNum/2-6);
+           context.lineTo(xAxisStart+40*xNum+20, yAxisStart+40*yNum/2);
+           context.lineTo(xAxisStart+40*xNum+10, yAxisStart+40*yNum/2+6);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'left';
+           context.fillText(xAxisTitle, xAxisStart+40*xNum+24, yAxisStart+40*yNum/2);
+
+         // y-axis
+           context.strokeStyle = '#000';
+           context.beginPath();
+           context.moveTo(xAxisStart, yAxisStart-20);
+           context.lineTo(xAxisStart, yAxisStart+40*yNum);
+           context.stroke();
+           context.moveTo(xAxisStart-6, yAxisStart-10);
+           context.lineTo(xAxisStart, yAxisStart-20);
+           context.lineTo(xAxisStart+6, yAxisStart-10);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.strokeStyle = '#000';
+           context.textAlign = 'center';
+  //         console.log("In the drawMotion function, with yAxisTitle = " + yAxisTitle + xAxisStart );
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.fillText(yAxisTitle, xAxisStart-30, yAxisStart - 35);
+
+           // graph title
+           context.font = 'bold 18pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, xAxisStart+40*xNum/2, yAxisStart-24);
+
+    }
+
+    function drawSlider(sliderX, sliderY, sliderXMin, sliderXMax, sliderValueMin, sliderValueMax, sliderValue, sliderDecimals) {
+
+
+       context.strokeStyle = '#999';
+       context.lineWidth = 8;
+       context.beginPath();
+       context.moveTo(sliderXMin,sliderY);
+       context.lineTo(sliderXMax,sliderY);
+       context.stroke();
+
+       context.strokeStyle = '#44f';
+       context.lineWidth = 8;
+       context.beginPath();
+       context.moveTo(sliderXMin,sliderY);
+       context.lineTo(sliderX,sliderY);
+       context.stroke();
+
+       context.beginPath();
+       context.arc(sliderX, sliderY, 10, 0, 2 * Math.PI, false);
+       context.fillStyle = '#00f';
+       context.fill();
+       context.lineWidth = 1;
+       context.strokeStyle = 'black';
+       context.stroke();
+
+      }
+
+//  Mouse and Touch event functions from  Wolfgang Bauer
+
+function whereClicked(x_,y_,what_) {    // underscore denotes local variables
+	//if (what_ == 'down') {console.log('('+x_+','+y_+')'+what_)};
+//	console.log('('+x_+','+y_+')'+what_);
+//    console.log("x offset = " + charge1X + " y offset = " + charge1Y);
+      if ((Math.abs(x_ - (msliderX)) < 40) && (Math.abs(y_ - msliderY) < 40))   // moving the g slider
+      {
+        msliderX = x_ ;
+        if (msliderX < msliderXMin) msliderX = msliderXMin;
+        if (msliderX > msliderXMax) msliderX = msliderXMax;
+//        console.log(runFlag);
+        if (runFlag == 0) {
+            index = index -1;
+            stepForward();
+        }
+
+    //    reset();
+      }
+      else if ((Math.abs(x_ - (forcesliderX)) < 40) && (Math.abs(y_ - forcesliderY) < 40))   // moving the g slider
+      {
+        forcesliderX = x_ ;
+        if (forcesliderX < forcesliderXMin) forcesliderX = forcesliderXMin;
+        if (forcesliderX > forcesliderXMax) forcesliderX = forcesliderXMax;
+        if (runFlag == 0) {
+            index = index -1;
+            stepForward();
+        }
+    //    reset();
+      }
+//        reset();
+//      }
+//      else if ((Math.abs(x_ - (charge2X)) < 15) && (Math.abs(y_ - charge2Y) < 15))  // moving the right-hand charge
+//      {
+//        charge2X = x_ ;
+//        charge2Y = y_ ;
+//        reset();
+//      }
+
+	if (what_ == 'down') {
+//		dragRect = true;
+//		x1 = x_;     // x1, y1 are global variables
+//		y1 = y_;
+	}
+	if (what_ == 'move') {
+//		dragRect = true;
+//		dx = x_-x1;
+//		dy = y_-y1;
+	}
+	if (what_ == 'up') {
+//		dragRect = false;
+//		dx = x_-x1;
+//		dy = y_-y1;
+	}
+}
+
+function myMove(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'move');
+//	drawAll();
+//	drawMotion();
+
+}
+
+function myDown(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'down');
+	canvas.onmousemove = myMove;
+//	drawMotion();
+}
+
+function myUp(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'up');
+	canvas.onmousemove = null;
+//	drawMotion();
+}
+
+function myTouchMove(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'move');
+//	drawMotion();
+}
+
+function myTouchStart(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'down');
+//	drawMotion();
+}
+
+function myTouchEnd(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'up');
+//	drawMotion();
+}
+
+
+  </script>
+<p>This simulation shows the connection between force and motion.</p>
+
+<p>A box is placed on a frictionless horizontal surface. You can adjust the
+mass of the box and the horizontal force applied to the box. Note that the free-body diagram is shown.
+The blue arrow is the normal force applied to the box by the surface; the green arrow is the force
+of gravity applied to the box by the Earth, and the red force (if there is one) is the force
+you control with the slider.</p>
+
+<p>Apply a non-zero force to the box and press Play. You should see the box start to move. What happens when you set the force back to zero?
+How can you make the box stop moving?</p>
+
+<p>Simulation written by Andrew Duffy, and first posted on 9-16-2017.</p>
+
+
+ <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+  
+    <p>The counter has been running on this page since 8-10-2018. The number of people accessing the page since then is:
+<br><img src="http://physics.bu.edu/cgi-bin/Count.cgi?df=force_motion_1D.dat" align="absmiddle">
+
+</body>
+</html>
