@@ -1,7 +1,7 @@
 2022.1
 CLAUDIA -> pousando_um_foguete.html
 MARCIO -> carrinho_balistico.html
-ISABEL -> movimento de projetil.html
+ISABEL -> movimento_de_projetil.html
 LUIZ -> lab_aceleracao_constante.html
 ERICA -> forca_movimento_1D.html
 ELOIZA -> forca_normal.html
