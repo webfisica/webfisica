@@ -4,7 +4,7 @@
 
 https://webfisica.github.io/webfisica/pousando_um_foguete.html
 https://webfisica.github.io/webfisica/carrinho_balistico.html
-https://webfisica.github.io/webfisica/movimento de projetil.html
+https://webfisica.github.io/webfisica/movimento_de_projetil.html
 https://webfisica.github.io/webfisica/lab_aceleracao_constante.html
 https://webfisica.github.io/webfisica/forca_movimento_1D.html
 https://webfisica.github.io/webfisica/forca_normal.html
