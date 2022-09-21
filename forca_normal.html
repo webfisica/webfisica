@@ -13,114 +13,114 @@
 </script>
 
   <meta charset="utf-8">
-  <title>Normal force</title>
-</head>
+  <title> Força normal </title>
+</cabeça>
 
-<body style="font-family:sans-serif; font-size:15px; width:500px; margin-left:auto; margin-right:auto;">
-<center>
-<H3> Exploring the normal force</H3>
-</center>
+<estilo do corpo="font-family:sans-serif; font-size:15px; width:500px; margin-left:auto; margin-right:auto;">
+<centro>
+<H3> Explorando a força normal </H3>
+</centro>
     <canvas id="myCanvas" width="500" height="300"></canvas>
-<center>
-     <div>Applied force (positive up)</div>
+<centro>
+     <div>Força aplicada (positivo para cima)</div>
      <div id="slider1">
-      -10 N <input type="range" id="FValue" min="-10" max="10" value="2.0" step="1.0" oninput="showF(this.value)" onchange="showF(this.value)"> +10 N
+      -10 N <tipo de entrada="range" id="FValue" min="-10" max="10" value="2.0" step="1.0" oninput="showF(this.value)" onchange="showF(this.value)"> +10 N
 <div id="initialFValue">2</div>
     </div>
 
-         <div>Weight of the box</div>
+         <div>peso da caixa</div>
      <div id="slider2">
-      10 N <input type="range" id="FValue" min="10" max="20" value="12.0" step="1.0" oninput="showW(this.value)" onchange="showW(this.value)"> +20 N
+      10 N <tipo de entrada="range" id="FValue" min="10" max="20" value="12.0" step="1.0" oninput="showW(this.value)" onchange="showW(this.value)"> +20 N
 <div id="initialWValue">12</div>
     </div>
 
 
-</center>
+</centro>
 
-  <script>
+  <roteiro>
 
 
-      function showF(newValue)
+      função showF(newValue)
       {
-             //get the element
+             //pega o elemento
              var display = document.getElementById("initialFValue");
-             //show the amount
+             //mostrar a quantidade
              display.innerHTML=newValue;
-             F = Number(newValue);
-             reset();
+             F = Número(Novo valor);
+             redefinir();
      }
 
-           function showW(newValue)
+           função showW(Novo valor)
       {
-             //get the element
+             //pega o elemento
              var display = document.getElementById("initialWValue");
-             //show the amount
+             //mostrar a quantidade
              display.innerHTML=newValue;
-             W = Number(newValue);
-             reset();
+             W = Número(novo valor);
+             redefinir();
      }
 
 
 
-      function reset() {
-        window.clearTimeout(timer);
-        index = -1;
-        time = 0.0;
+      função reset() {
+        window.clearTimeout(temporizador);
+        índice = -1;
+        tempo = 0.0;
         FN = W - F;
         runFlag = 1;
-        drawMotion();
+        desenhar movimento();
 
       }
 
 
       var canvas = document.getElementById("myCanvas");
       var context = canvas.getContext("2d");
-      var index = -1;
+      índice var = -1;
       var xBase = 320;
       var yBase = 150;
       var xInit = 37;
-      var graphType = 1;
-      var graphTitle = 'Exploring the normal force';
+      var tipografo = 1;
+      var graphTitle = 'Explorando a força normal';
       var yAxisTitle = 'omega (rad/s)';
       var xAxisTitle = 't (s)';
       var yIncrement = 20;
-      var yNumDecimals = 1;
-      var yStart = yBase+120;
+      var yNumDecimais = 1;
+      var yínicio = yBase+120;
       var plotColor = '#ff00ff';
-      var scenario = 1;
+      var cenário = 1;
       var F = 2.0;
-      var W = 12;           // weight of the box
+      var W = 12;           // peso da caixa 
       var FN = W - F;
       var mgColor = '#393';
       var FNColor = '#939';
       var FColor = '#339';
-      var time = 0.0;
+      var tempo = 0.0;
       var deltat = 1/20.0;
-      var timer;
+      var temporizador;
       var runFlag = 1;
 
-      reset();
+      redefinir();
 
-    function drawMotion() {
+    função drawMotion() {
 
   //    console.log("In the drawMotion function, with runFlag = " + runFlag );
 
-      if (index >= 400) runFlag = 0;
+      if (índice >= 400) runFlag = 0;
 
-  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " Fx = " + Fx);
+  //    console.log("Na função drawMotion, with runFlag = " + runFlag + " Fx = " + Fx);
 
-      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
-        // clear
+      if (runFlag == 1) {    //      executa se runFlag igual a 1, not if equal 0
+        // claro
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        index = index + 1;
+        índice = índice + 1;
 
-        // set background color for the entire thing
+        // defina a cor de fundo para coisa toda
            context.fillStyle = "#ffd";
            context.fillRect(0, 0, canvas.width, canvas.height);
 
 
-        // set line color
+        // define a cor da linha
            context.strokeStyle = 'black';
            context.lineWidth = 2;
            context.beginPath();
@@ -129,19 +129,19 @@
            context.stroke();
 
 
-         // draw the box
+         // desenha a caixa
            context.strokeStyle = '#00b';
            context.fillStyle = "#ccf";
            context.fillRect(xBase, yBase, 40, 40);
            context.fillRect(xBase-180, yBase, 40, 40);
 
-         // draw the mg arrow
+         // desenha a seta mg
          drawArrow(0,-W,xBase+10,yBase+20,1.5*3.1416,mgColor);
 
-         // draw the FN arrow
+         // desenha a seta FN
          drawArrow(0,FN,xBase+30,yBase+40,0.5*3.1416,FNColor);
 
-         // draw the applied force arrow
+         // desenha a seta de força aplicada
          if (F > 0) {
            drawArrow(0,F,xBase+20,yBase,0.5*3.1416,FColor);
            drawArrow(0,F,xBase+20-180,yBase,0.5*3.1416,FColor);
@@ -151,40 +151,40 @@
            drawArrow(0,F,xBase+20-180,yBase,1.5*3.1416,FColor);
          }
 
-        // draw the scenario
+        // desenha o cenário
 
- //     console.log("In the drawMotion function, with runFlag = " + runFlag + " x2 = " + x2);
+ //     console.log(" Na função drawMotion , with runFlag = " + runFlag + " x2 = " + x2);
 
 
-           // graph title
-           context.font = 'bold 16pt Calibri';
-           context.fillStyle = 'purple';
-           context.textAlign = 'center';
+           // título do gráfico
+           context.font = 'negrito 16pt Calibri';
+           context.fillStyle = 'roxo';
+           context.textAlign = 'centro';
 //           context.fillText(graphTitle, 120+(canvas.width)/2, 70);
 
            context.font = '16pt Calibri';
-           context.fillStyle = 'black';
+           context.fillStyle = 'preto';
 
-          context.fillStyle = mgColor;
+          context.fillStyle = mgCor;
           var forceLabel = 'mg';
-          context.textAlign = 'left';
+          context.textAlign = 'esquerda';
           context.fillText(forceLabel, xBase-24,yBase+54);
 
           if (F != 0) {
             context.fillStyle = FColor;
             forceLabel = "F";
             context.fillText(forceLabel, xBase+20-180+10,yBase-5*F);
-            context.font = 'bold 12pt Calibri';
-            forceLabel = "applied";
+            context.font = 'negrito 12pt Calibri';
+            forceLabel = "aplicado";
             context.fillText(forceLabel, xBase+20-180+18,yBase-5*F+6);
           }
 
           if (FN != 0) {
-            context.font = 'bold 16pt Calibri';
+            context.font = 'negrito 16pt Calibri';
             context.fillStyle = FNColor;
             forceLabel = "F";
             context.fillText(forceLabel, xBase+30+10,yBase+30);
-            context.font = 'bold 12pt Calibri';
+            context.font = 'negrito 12pt Calibri';
             forceLabel = "N";
             context.fillText(forceLabel, xBase+30+10+8, yBase+30+6);
           }
@@ -215,20 +215,20 @@
            context.fill();
 
     }
-    function runMotion() {
-        drawMotion();
+    função runMotion() {
+        desenhar movimento ();
         if (runFlag == 1) {
-          timer = window.setTimeout(runMotion, 1000/60);
+          temporizador = window.setTimeout(runMotion, 1000/60);
         }
       }
 
   </script>
 
-  <p>In this simulation, you see, on the left, a picture of a box at rest on a table. You can apply a vertical force (up or down) to the box.
-  On the right, you can see the full free-body diagram of the box. The free-body diagram shows the gravitational force (green) exerted on the box by the Earth,
-  the normal force (purple) exerted by the table, and the vertical force (dark blue) that you apply. Note that, on the free-body diagram, all three forces are along the
-  vertical line passing through the center of the box, but the force of gravity and the normal force have been shifted a little so they can be seen
-  more easily.</p>
+  <p>Nesta simulação, você vê, à esquerda, a imagem de uma caixa em repouso sobre uma mesa. Você pode aplicar uma força vertical (para cima ou para baixo) na caixa.
+  À direita, você pode ver o diagrama de corpo livre completo da caixa . O diagrama de corpo livre mostra a força gravitacional(verde)exercida sobre a caixa pela terra,
+  a força normal (roxa) exercida pela mesa e a força vertical (azul escuro) que você aplica. Observe que, no diagrama de corpo livre, todas as três forças estão ao longo da
+  linha vertical que passa pelo centro da caixa, mas a força da gravidade e a força normal foram deslocadas um pouco, para que possam ser vistas
+  mais facilmente. </p>
 
 <p> Simulation by Andrew Duffy. Amended on 8-16-2016 to include labels on the force vectors.</p>
     <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
