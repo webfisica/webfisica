@@ -1,4 +1,14 @@
 2022.1
+
+CLAUDIA -> difusao.html
+MARCIO -> efeito_doppler.html
+ISABEL -> expansao_termica.html
+LUIZ -> forca_empuxo.html
+ERICA -> lei_de_ohm.html
+ELOIZA -> onda_longitudinal.html
+DAYSE -> pressao_em_um_fluido_estatico.html
+WIGNA -> uma onda transversal.html
+
 CLAUDIA -> pousando_um_foguete.html
 MARCIO -> carrinho_balistico.html
 ISABEL -> movimento_de_projetil.html
