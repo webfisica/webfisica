@@ -7,7 +7,8 @@ LUIZ -> forca_empuxo.html
 ERICA -> lei_de_ohm.html
 ELOIZA -> onda_longitudinal.html
 DAYSE -> pressao_em_um_fluido_estatico.html
-WIGNA -> uma onda transversal.html
+WIGNA -> uma_onda_transversal.html
+BEATRIZ -> um_gas_ideal.html
 
 CLAUDIA -> pousando_um_foguete.html
 MARCIO -> carrinho_balistico.html
