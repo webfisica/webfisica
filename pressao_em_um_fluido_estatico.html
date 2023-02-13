@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script type="text/javascript" async="" src="Pressure%20in%20a%20static%20fluid_files/analytics.js"></script><script async="" src="Pressure%20in%20a%20static%20fluid_files/js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-18');
+</script>
+
+  <meta charset="utf-8">
+  <title>Pressure in a static fluid</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; margin-left:10; margin-right:10;">
+<center>
+	<div id="canvasesdiv" style="position:relative; display:block; margin:auto; width:600px; height:440px"></div>
+    <canvas id="myCanvas" style="display: block; position: absolute; margin: 0 auto;display: block;
+        position: absolute; margin: 0 auto; top: 0; bottom: 0; left: 0; right: 0;" width="600" height="440"></canvas>
+    <div id="viewbuttons">Display: 
+      <input type="button" id="v1" value="Absolute pressure" onclick="mode = 1;">
+      <input type="button" id="v2" value="Gauge pressure" onclick="mode = 2;">
+    </div>
+
+</center>
+
+  <script>
+
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        time = index/20;
+        xPos = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        runFlag = 1;
+
+        runMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      canvas.onmousedown = myDown;							// mouse event handler for computer browsers
+	  canvas.onmouseup = myUp;								// mouse event handler for computer browsers
+	  canvas.addEventListener("touchstart", myTouchStart, false);	// touch handler for iPhones, iPads, and Androids
+	  canvas.addEventListener("touchmove", myTouchMove, false);	// touch handler for iPhones, iPads, and Androids
+	  canvas.addEventListener("touchend", myTouchEnd, false);		// touch handler for iPhones, iPads, and Androids
+
+
+      var position = 5;
+
+ //     var positionsliderX = 300;
+      var positionsliderY = 420;
+      var positionsliderXMin = 200;
+      var positionsliderXMax = 400;
+      var positionsliderValueMin = -10;
+      var positionsliderValueMax = 10;
+      var positionsliderValue = position;
+      var positionsliderX = positionsliderXMin+(positionsliderXMax-positionsliderXMin)*(positionsliderValue-positionsliderValueMin)/(positionsliderValueMax-positionsliderValueMin);
+      var positionsliderDecimals = 1;
+
+
+      var xBase = 494;     // for the graph
+      var xBase2 = 160;   // for the motion
+      var yBase = 70;     // for the graph
+      var yBase2 = 310;    // for the motion
+      var xInit = 37;
+      var message1 = " ";
+      var message2 = " ";
+      var message3 = " ";
+      var title = "Pressure in a static fluid";
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var scenario = 1;
+      var radius = 5;
+      var time = 0.0;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+
+      var mode = 1;
+      var wheelRadius = 100;
+      var nSpokes = 4;
+      var nArray = 4;
+      var g = 10.0;
+      var p1 = 1.225;
+      var p2 = 1000;
+      var p3 = 13600;
+      var p4 = 800;
+      var PA = 101325;
+      var gauge = new Array(nArray);
+
+      for (var i = 0; i < nArray; i++) {
+         gauge[i] = {};
+         gauge[i].density = 1000;
+         gauge[i].color = "red";
+         gauge[i].pressure = PA;
+         gauge[i].fluid = "water";
+        }
+      gauge[0].density = p1;
+      gauge[1].density = p2;
+      gauge[2].density = p3;
+      gauge[3].density = p4;
+      gauge[0].color = "red";
+      gauge[1].color = "orange";
+      gauge[2].color = "black";
+      gauge[3].color = "green";
+      gauge[0].fluid = "air";
+      gauge[1].fluid = "water";
+      gauge[2].fluid = "mercury";
+      gauge[3].fluid = "unknown";
+
+    
+
+      reset();
+
+
+     drawMotion();
+
+    function drawMotion() {
+
+ //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      runFlag = 1;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " yPos = " + yPos + " index = " +index);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+//        console.log(I1 + "   " +I2 + "    " + I3);
+
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+       // set background color for the entire thing
+           context.fillStyle = "#ddf";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+
+           context.strokeStyle = '#000';
+           context.lineWidth = 1;
+
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+           time = index/10.0;
+           var maxTime = Math.sqrt(2.0*(200-position));
+           var vx = Math.sqrt(2.0*position);
+           var xPos = vx*time;
+           var yPos = 0.5*time*time;
+//           xPos = vxInit*time;
+//           yPos = vyInit*time - 0.5*g*time*time;
+//           var vy = vyInit - g*time;
+ //          console.log(time + ' ' + xPos + ' ' + yPos);
+
+       // draw position slider
+
+           drawSlider(positionsliderX, positionsliderY, positionsliderXMin, positionsliderXMax, positionsliderValueMin, positionsliderValueMax, positionsliderValue, positionsliderDecimals);
+           var sLabel = 'gauge position =  ';
+           sLabel = sLabel + positionsliderValue.toFixed(positionsliderDecimals) + ' m';
+           context.font = '16pt Calibri';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           context.fillStyle = 'black';
+           context.fillText(sLabel,positionsliderXMin+0.5*(positionsliderXMax-positionsliderXMin), positionsliderY-25);
+
+
+   
+
+        // draw three buckets
+
+        for (var i=0; i <=2; i++) {
+          context.beginPath();
+          context.strokeStyle = 'black';
+          context.lineWidth = 8;
+          context.moveTo(xBase2+150*i,yBase2-152);
+          context.lineTo(xBase2+150*i,yBase2+2); 
+          context.lineTo(xBase2+150*i+80,yBase2+2); 
+          context.lineTo(xBase2+150*i+80,yBase2-152); 
+          context.stroke();    
+        }
+ 
+        context.beginPath();
+        context.fillStyle = 'black';
+        context.fillText(gauge[0].fluid, xBase2-150+40, 335);
+
+        // draw the water in bucket 1
+
+        context.beginPath();
+        context.fillStyle = 'blue';
+        context.fillRect(xBase2, yBase2-152, 80, 154);
+        context.fill();   
+        context.fillText(gauge[1].fluid, xBase2+40, 335);
+
+        // draw the mercury in bucket 2
+
+        context.beginPath();
+        context.fillStyle = 'grey';
+        context.fillRect(xBase2+150, yBase2-152, 80, 154);
+        context.fill();    
+        context.fillText(gauge[2].fluid, xBase2+150+40, 335);
+
+        // draw the fluid in bucket 3
+
+        context.beginPath();
+        context.fillStyle = '#aa2';
+        context.fillRect(xBase2+300, yBase2-152, 80, 154);
+        context.fill();    
+        context.fillText(gauge[3].fluid, xBase2+300+40, 335);
+
+        // draw a horizontal line marking the position of atmospheric pressure
+        context.beginPath();
+        context.strokeStyle = 'white';
+        context.lineWidth = 1;
+        context.moveTo(2,yBase2-152);
+        context.lineTo(canvas.width-2,yBase2-152); 
+        context.stroke();    
+
+        // draw the lines for the four pressure gauges
+ 
+        for (var i=-1; i <=2; i++) {
+          context.beginPath();
+          context.strokeStyle = 'green';
+          context.lineWidth = 2;
+          context.moveTo(xBase2+40+150*i,yBase2-252);
+          context.lineTo(xBase2+40+150*i,yBase2-52); 
+          context.stroke(); 
+        }
+ 
+         // draw the four pressure gauges
+ 
+        for (var i=0; i <=3; i++) {
+          context.beginPath();
+          context.fillStyle = gauge[i].color;
+          context.arc(xBase2+40+150*(i-1),yBase2-152+10*position, 6, 0, 2 * Math.PI, false); 
+          context.fill();
+          if (position <= 0.0) gauge[i].pressure = g*gauge[0].density*position;
+          else gauge[i].pressure = g*gauge[i].density*position;
+          if (mode == 1) gauge[i].pressure = gauge[i].pressure + PA;
+          context.font = '14pt Calibri';
+          context.textAlign = 'left';
+          context.fillText("P = "+gauge[i].pressure.toFixed(1) + " Pa", xBase2+150*(i-1), 360);
+
+        }
+      
+
+        if (time > maxTime) index = -1;
+
+        context.font = '16pt Calibri';
+        context.fillStyle = 'blue';
+
+        context.textAlign = 'left';
+        context.fillText(message1, xBase2-40, 360);
+        context.fillText(message2, xBase2-40, 390);
+        context.fillText(message3, xBase2-40, 420);
+
+        context.font = '16pt Calibri';
+        context.fillStyle = 'purple';
+
+        context.textAlign = 'center';
+        context.fillText(title, canvas.width/2, 30);
+
+          var aLabel = 'gauges at ';
+           aLabel = aLabel + position.toFixed(1) + ' m';
+           context.font = '16pt Calibri';
+           context.textAlign = 'left';
+           context.textBaseline = 'middle';
+           context.fillStyle = 'purple';
+    //       context.fillText(aLabel,350, positionsliderY-10);
+
+
+
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+
+
+    function drawSlider(sliderX, sliderY, sliderXMin, sliderXMax, sliderValueMin, sliderValueMax, sliderValue, sliderDecimals) {
+
+
+       context.strokeStyle = '#999';
+       context.lineWidth = 8;
+       context.beginPath();
+       context.moveTo(sliderXMin,sliderY);
+       context.lineTo(sliderXMax,sliderY);
+       context.stroke();
+
+       context.strokeStyle = '#44f';
+       context.lineWidth = 8;
+       context.beginPath();
+       context.moveTo(sliderXMin,sliderY);
+       context.lineTo(sliderX,sliderY);
+       context.stroke();
+
+       context.beginPath();
+       context.arc(sliderX, sliderY, 10, 0, 2 * Math.PI, false);
+       context.fillStyle = '#00f';
+       context.fill();
+       context.lineWidth = 1;
+       context.strokeStyle = 'black';
+       context.stroke();
+
+      }
+
+//  Mouse and Touch event functions from  Wolfgang Bauer
+
+function whereClicked(x_,y_,what_) {    // underscore denotes local variables
+	//if (what_ == 'down') {console.log('('+x_+','+y_+')'+what_)};
+//	console.log('('+x_+','+y_+')'+what_);
+//    console.log("x offset = " + current1X + " y offset = " + current1Y);
+      if ((Math.abs(x_ - (positionsliderX)) < 40) && (Math.abs(y_ - positionsliderY) < 40))   // moving the temp slider
+      {
+        positionsliderX = x_ ;
+        if (positionsliderX < positionsliderXMin) positionsliderX = positionsliderXMin;
+        if (positionsliderX > positionsliderXMax) positionsliderX = positionsliderXMax;
+        positionsliderValue = positionsliderValueMin + (positionsliderValueMax-positionsliderValueMin)*(positionsliderX-positionsliderXMin)/(positionsliderXMax-positionsliderXMin);
+        position = positionsliderValue;
+        reset();
+      }
+
+	if (what_ == 'down') {
+//		dragRect = true;
+//		x1 = x_;     // x1, y1 are global variables
+//		y1 = y_;
+	}
+	if (what_ == 'move') {
+//		dragRect = true;
+//		dx = x_-x1;
+//		dy = y_-y1;
+	}
+	if (what_ == 'up') {
+//		dragRect = false;
+//		dx = x_-x1;
+//		dy = y_-y1;
+	}
+}
+
+function myMove(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'move');
+//	drawAll();
+//	drawMotion();
+
+}
+
+function myDown(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'down');
+	canvas.onmousemove = myMove;
+//	drawMotion();
+}
+
+function myUp(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'up');
+	canvas.onmousemove = null;
+//	drawMotion();
+}
+
+function myTouchMove(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'move');
+//	drawMotion();
+}
+
+function myTouchStart(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'down');
+//	drawMotion();
+}
+
+function myTouchEnd(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'up');
+//	drawMotion();
+}
+
+
+  </script>
+<p>This simulation shows four pressure sensors. One stays in air, the 
+second can go into a container of water, the third can go into a 
+container of mercury, and the fourth can go into a container of unknown 
+fluid. The slider controls the vertical position of the pressure gauges.</p>
+
+<p>The horizontal white line shows the position of standard atmospheric 
+pressure, which is at the top of each fluid. Note what happens to the 
+pressure readings as you move the pressure gauges up and down. You can 
+choose between displaying absolute pressure or gauge pressure - gauge 
+pressure is simply the absolute pressure minus atmospheric pressure 
+(101325 Pa).</p>
+
+<p>With this simulation, what can you determine about the unknown fluid?</p>
+
+<p>Simulation written by Andrew Duffy, and first posted on 7-26-2018. </p>
+
+
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="Pressure%20in%20a%20static%20fluid_files/88x31.png"></a><br>This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br>This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+
+    <p>The counter has been running on this page since 8-11-2018. The number of people accessing the page since then is:
+<br><img src="Pressure%20in%20a%20static%20fluid_files/Count.gif" align="absmiddle">
+
+
+
+</p></body></html>

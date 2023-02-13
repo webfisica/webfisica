@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script type="text/javascript" async="" src="Fluid%20in%20a%20Pipe_files/analytics.js"></script><script async="" src="Fluid%20in%20a%20Pipe_files/js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-18');
+</script>
+
+  <meta charset="utf-8">
+  <title>Fluid in a Pipe</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; width:500px; margin-left:auto; margin-right:auto;">
+<center>
+
+</center>
+    <canvas id="myCanvas" width="500" height="200"></canvas>
+<center>
+    <div id="buttons">
+      <input type="button" id="play" value="Play" onclick="play()">
+      <input type="button" id="pause" value="Pause" onclick="pause()">
+      <input type="button" id="stepback" value="&lt;&lt; Step" onclick="stepBack()">
+      <input type="button" id="stepforward" value="Step &gt;&gt;" onclick="stepForward()">
+      <input type="button" id="reset" value="Reset" onclick="reset()">
+    </div>
+
+</center>
+
+  <script>
+
+
+      function play() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        runMotion();
+
+      }
+
+      function pause() {
+        window.clearTimeout(timer);
+        runFlag = 0;
+
+      }
+
+      function stepForward() {
+        window.clearTimeout(timer);
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+      function stepBack() {
+        window.clearTimeout(timer);
+        index = index-2;
+        if (index < -1) index = -1;
+        time = index/50;
+        x1 = x1 - vx*2/50.0;
+
+        xPos = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        x1 = xBase;
+        runFlag = 1;
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      var index = -1;
+      var xBase = 50;
+      var yBase = 50;
+      var xInit = 37;
+      var graphType = 1;
+      var graphTitle = 'Fluid in a pipe';
+      var yStart = yBase+120;
+      var scenario = 1;
+      var x1 = xBase;
+      var y1;
+      var vx = 28.6667;
+      var radius = 8;
+      var time = 0.0;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+
+      reset();
+
+    function drawMotion() {
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      if (index >= 500) reset();
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " Fx = " + Fx);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        index = index + 1;
+
+        // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // set background color for the top half
+           context.fillStyle = "#eff";
+//           context.fillRect(xBase, yBase, 400, 80);
+
+           context.strokeStyle = '#000';
+           context.lineWidth = 2;
+
+
+
+           context.beginPath();
+           context.moveTo(xBase, yBase);
+           context.lineTo(xBase+70, yBase);
+           context.lineTo(xBase+120, yBase+30);
+           context.lineTo(xBase+280, yBase+30);
+           context.lineTo(xBase+330, yBase);
+           context.lineTo(xBase+400, yBase);
+//           context.stroke();
+
+           context.lineTo(xBase+400, yBase+120);
+           context.lineTo(xBase+330, yBase+120);
+           context.lineTo(xBase+280, yBase+90);
+           context.lineTo(xBase+120, yBase+90);
+           context.lineTo(xBase+70, yBase+120);
+           context.lineTo(xBase, yBase+120);
+           context.stroke();
+           context.fill();
+
+           context.strokeStyle = "#eff";
+
+           context.beginPath();
+           context.moveTo(xBase+400, yBase);
+           context.lineTo(xBase+400, yBase+120);
+           context.stroke();
+
+
+
+        // set line color
+           context.strokeStyle = '#999';
+           context.lineWidth = 2;
+
+           time = index/50.0;
+
+           vx = 28.6667;
+           if ((time > 2.4419) && (time <= 3.60499)) vx = 28.6667+24.6533*(time-2.4419);
+           if ((time > 3.60499) && (time <= 6.39569)) vx = 57.3333;
+           if ((time > 6.39569) && (time <= 7.5581)) vx = 57.3333-24.6533*(time-6.39569);
+//            if (ch09T > 7.5581) vx908 = 28.6667;
+           x1 = x1 + vx*1/50.0;
+//                 console.log("In the drawMotion function, with x1 = " + x1 );
+
+
+           for (var j = 0; j<=10; j++)
+            {
+                y1 = yBase+110-j*10;
+                if ((time > 2.4419) && (time <= 3.60499)) y1 = y1 +(j-5)*4.2989*(time-2.4419);
+                if ((time > 3.60499) && (time <= 6.39569)) y1 = yBase+85-j*5;
+                if ((time > 6.39569) && (time <= 7.5581)) y1 = yBase+85-j*5 -(j-5)*4.2989*(time-6.39569);
+
+             context.beginPath();
+             context.arc(x1, y1, 3, 0, 2 * Math.PI, false);
+             context.fillStyle = '#00f';
+             context.fill();
+            }
+
+
+        // draw the scenario
+
+ //     console.log("In the drawMotion function, with runFlag = " + runFlag + " x2 = " + x2);
+
+
+           // graph title
+           context.font = 'bold 16pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, (canvas.width)/2, 35);
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+
+        var timeLabel = 't = ';
+        timeLabel = timeLabel + time.toFixed(3) + ' s';
+        context.textAlign = 'left';
+//
+
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+  </script>
+
+<br><br>
+ <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="Fluid%20in%20a%20Pipe_files/88x31.png"></a><br>This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br>This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+  
+     <p>The counter has been running on this page since 8-11-2018. The number of people accessing the page since then is:
+<br><img src="Fluid%20in%20a%20Pipe_files/Count.gif" align="absmiddle">
+
+
+</p></body></html>

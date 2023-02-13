@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script type="text/javascript" async="" src="Buoyant%20force_files/analytics.js"></script><script async="" src="Buoyant%20force_files/js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-8175315-18');
+</script>
+
+
+  <meta charset="utf-8">
+  <title>Buoyant force</title>
+</head>
+
+<body style="font-family:sans-serif; font-size:15px; margin-left:10; margin-right:10;">
+<center>
+	<div id="canvasesdiv" style="position:relative; display:block; margin:auto; width:680px; height:450px"></div>
+    <canvas id="myCanvas" style="display: block; position: absolute; margin: 0 auto;display: block;
+        position: absolute; margin: 0 auto; top: 0; bottom: 0; left: 0; right: 0;" width="680" height="450"></canvas>
+
+</center>
+
+  <script>
+
+
+
+
+      function reset() {
+        window.clearTimeout(timer);
+        index = -1;
+        time = 0.0;
+        runFlag = 1;
+        minPercent = blockSubmerged;
+        maxPercent = blockSubmerged;
+        drawMotion();
+
+      }
+
+
+      var canvas = document.getElementById("myCanvas");
+      var context = canvas.getContext("2d");
+      canvas.onmousedown = myDown;							// mouse event handler for computer browsers
+	  canvas.onmouseup = myUp;								// mouse event handler for computer browsers
+	  canvas.addEventListener("touchstart", myTouchStart, false);	// touch handler for iPhones, iPads, and Androids
+	  canvas.addEventListener("touchmove", myTouchMove, false);	// touch handler for iPhones, iPads, and Androids
+	  canvas.addEventListener("touchend", myTouchEnd, false);		// touch handler for iPhones, iPads, and Androids
+
+
+      var position = 5;
+
+      var xBase = 494;     // for the graph
+      var xBase2 = 140;   // for the graph
+      var yBase = 70;     // for the graph
+      var yBase2 = 40;    // for the motion
+      var xInit = 37;
+
+      var graphTitle = 'Forces vs. % submerged';
+      var yAxisTitle = 'Force (N)';
+      var xAxisTitle = '%';
+      var xIncrement = 10;
+      var xNumDecimals = 0;
+      var yIncrement = 10;
+      var yNumDecimals = 0;
+      var xAxisOffset = 0;
+      var graphYdraw = 2;
+      var graphY = 6;
+      var graphX = 10;
+
+      var message1 = " ";
+      var message2 = " ";
+      var message3 = " ";
+      var title = "Buoyant force";
+      var yStart = yBase+120;
+      var plotColor = '#ff00ff';
+      var scenario = 1;
+      var radius = 5;
+      var time = 0.0;
+      var deltat = 1/20.0;
+      var timer;
+      var runFlag = 1;
+
+      var fluidDensity = 1500;   // in units of kg/m^3
+      var blockDensity = 600;   // in units of kg/m^3
+      var blockVolume = 1000;   // in units of cm^3
+      var blockSubmerged = 0;   // percent
+      var minPercent = 0;
+      var maxPercent = 0;
+      var g = 10.0;
+      var viewScale = 0;
+      var fluidVolume = 2000;
+    
+ //     var fluidDensitySliderX = 300;
+      var fluidDensitySliderY = 330;
+      var fluidDensitySliderXMin = 80;
+      var fluidDensitySliderXMax = 280;
+      var fluidDensitySliderValueMin = 1000;
+      var fluidDensitySliderValueMax = 2000;
+      var fluidDensitySliderValue = fluidDensity;
+      var fluidDensitySliderX = fluidDensitySliderXMin+(fluidDensitySliderXMax-fluidDensitySliderXMin)*(fluidDensitySliderValue-fluidDensitySliderValueMin)/(fluidDensitySliderValueMax-fluidDensitySliderValueMin);
+      var fluidDensitySliderDecimals = 0;
+
+      var blockSubmergedSliderY = 330;
+      var blockSubmergedSliderXMin = 400;
+      var blockSubmergedSliderXMax = 600;
+      var blockSubmergedSliderValueMin = 0;
+      var blockSubmergedSliderValueMax = 100;
+      var blockSubmergedSliderValue = blockSubmerged;
+      var blockSubmergedSliderX = blockSubmergedSliderXMin+(blockSubmergedSliderXMax-blockSubmergedSliderXMin)*(blockSubmergedSliderValue-blockSubmergedSliderValueMin)/(blockSubmergedSliderValueMax-blockSubmergedSliderValueMin);
+      var blockSubmergedSliderDecimals = 1;
+
+      var blockDensitySliderY = 410;
+      var blockDensitySliderXMin = 80;
+      var blockDensitySliderXMax = 280;
+      var blockDensitySliderValueMin = 200;
+      var blockDensitySliderValueMax = 1000;
+      var blockDensitySliderValue = blockDensity;
+      var blockDensitySliderX = blockDensitySliderXMin+(blockDensitySliderXMax-blockDensitySliderXMin)*(blockDensitySliderValue-blockDensitySliderValueMin)/(blockDensitySliderValueMax-blockDensitySliderValueMin);
+      var blockDensitySliderDecimals = 0;
+
+      var blockVolumeSliderY = 410;
+      var blockVolumeSliderXMin = 400;
+      var blockVolumeSliderXMax = 600;
+      var blockVolumeSliderValueMin = 1000;
+      var blockVolumeSliderValueMax = 2000;
+      var blockVolumeSliderValue = blockVolume;
+      var blockVolumeSliderX = blockVolumeSliderXMin+(blockVolumeSliderXMax-blockVolumeSliderXMin)*(blockVolumeSliderValue-blockVolumeSliderValueMin)/(blockVolumeSliderValueMax-blockVolumeSliderValueMin);
+      var blockVolumeSliderDecimals = 0;
+
+
+     drawMotion();
+
+    function drawMotion() {
+
+ //    console.log("In the drawMotion function, with runFlag = " + runFlag );
+
+      runFlag = 1;
+
+  //    console.log("In the drawMotion function, with runFlag = " + runFlag + " yPos = " + yPos + " index = " +index);
+
+      if (runFlag == 1) {    //      run if runFlag equal 1, not if equal 0
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+  //      index = index + 1;
+//        console.log(I1 + "   " +I2 + "    " + I3);
+
+        // clear
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+       // set background color for the entire thing
+           context.fillStyle = "#ffd";
+           context.fillRect(0, 0, canvas.width, canvas.height);
+
+
+           context.strokeStyle = '#000';
+           context.lineWidth = 1;
+
+           blockSubmerged = 100*blockDensity/fluidDensity;
+
+           var forceBuoyant = 0.01*blockSubmerged*fluidDensity*g*blockVolume*1e-6;
+
+
+       // draw fluid density slider
+
+           drawSlider(fluidDensitySliderX, fluidDensitySliderY, fluidDensitySliderXMin, fluidDensitySliderXMax, fluidDensitySliderValueMin, fluidDensitySliderValueMax, fluidDensitySliderValue, fluidDensitySliderDecimals);
+           var sLabel = 'Fluid density =  ';
+           sLabel = sLabel + fluidDensitySliderValue.toFixed(fluidDensitySliderDecimals) + ' kg/m^3';
+           context.font = '16pt Calibri';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           context.fillStyle = 'black';
+           context.fillText(sLabel,fluidDensitySliderXMin+0.5*(fluidDensitySliderXMax-fluidDensitySliderXMin), fluidDensitySliderY-25);
+
+       // draw block submerged slider
+
+ //          drawSlider(blockSubmergedSliderX, blockSubmergedSliderY, blockSubmergedSliderXMin, blockSubmergedSliderXMax, blockSubmergedSliderValueMin, blockSubmergedSliderValueMax, blockSubmergedSliderValue, blockSubmergedSliderDecimals);
+ //          var sLabel = 'Percent of block submerged =  ';
+ //          sLabel = sLabel + blockSubmergedSliderValue.toFixed(blockSubmergedSliderDecimals) + '%';
+ //          context.font = '16pt Calibri';
+ //          context.textAlign = 'center';
+ //          context.textBaseline = 'middle';
+ //          context.fillStyle = 'black';
+ //          context.fillText(sLabel,blockSubmergedSliderXMin+0.5*(blockSubmergedSliderXMax-blockSubmergedSliderXMin), blockSubmergedSliderY-25);
+
+       // draw block density slider
+
+           drawSlider(blockDensitySliderX, blockDensitySliderY, blockDensitySliderXMin, blockDensitySliderXMax, blockDensitySliderValueMin, blockDensitySliderValueMax, blockDensitySliderValue, blockDensitySliderDecimals);
+           var sLabel = 'Density of block =  ';
+           sLabel = sLabel + blockDensitySliderValue.toFixed(blockDensitySliderDecimals) + ' kg/m^3';
+           context.font = '16pt Calibri';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           context.fillStyle = 'black';
+           context.fillText(sLabel,blockDensitySliderXMin+0.5*(blockDensitySliderXMax-blockDensitySliderXMin), blockDensitySliderY-25);
+
+       // draw block volume slider
+
+           drawSlider(blockVolumeSliderX, blockVolumeSliderY, blockVolumeSliderXMin, blockVolumeSliderXMax, blockVolumeSliderValueMin, blockVolumeSliderValueMax, blockVolumeSliderValue, blockVolumeSliderDecimals);
+           var sLabel = 'Block volume =  ';
+           sLabel = sLabel + blockVolumeSliderValue.toFixed(blockVolumeSliderDecimals) + ' cm^3';
+           context.font = '16pt Calibri';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           context.fillStyle = 'black';
+           context.fillText(sLabel,blockVolumeSliderXMin+0.5*(blockVolumeSliderXMax-blockVolumeSliderXMin), blockVolumeSliderY-25);
+
+
+//  draw the container
+        var waterColor = "#8af";
+        context.fillStyle = waterColor;
+        context.strokeStyle = "black";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.fillRect(xBase2, yBase2+40*graphY-20, 400, -(100+0.0001*blockVolume*blockSubmerged));
+        context.moveTo(xBase2,yBase2+40*graphY-170);
+        context.lineTo(xBase2,yBase2+40*graphY-20);
+        context.lineTo(xBase2+400,yBase2+40*graphY-20);
+        context.lineTo(xBase2+400,yBase2+40*graphY-170);
+        context.stroke();
+
+
+
+// draw the block
+        var blockColor = "#393";
+        context.fillStyle = blockColor;
+        context.beginPath();
+        context.fillRect(xBase2+200-blockVolume/16, yBase2+40*graphY-20-(100+0.0001*blockVolume*blockSubmerged)-(100-blockSubmerged), 2*blockVolume/16, 100);
+        context.fillStyle = "#5b5";
+        context.fillRect(xBase2+200-blockVolume/16, yBase2+40*graphY-20-(100+0.0001*blockVolume*blockSubmerged), 2*blockVolume/16, blockSubmerged);
+
+
+
+// show the buoyant force 
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'blue';
+
+           context.textAlign = 'left';
+           context.fillText("Buoyant force = mg = " + (forceBuoyant).toFixed(1)+" N", xBase2+240, yBase2+40*graphY+40);
+  
+
+// draw the title
+        context.font = '20pt Calibri';
+        context.fillStyle = 'blue';
+
+        context.textAlign = 'center';
+        context.fillText(title, canvas.width/2, 30);
+
+
+
+      }
+    }
+
+    function runMotion() {
+        drawMotion();
+        if (runFlag == 1) {
+          timer = window.setTimeout(runMotion, 1000/60);
+        }
+      }
+
+
+    function drawArrow(Fx,Fy,Px,Py, arrowColor) {
+           var theta = Math.atan2(Fy,Fx);
+           context.strokeStyle = arrowColor;
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(Px, Py);
+           context.lineTo(Px+5*Fx, Py-5*Fy);
+           context.stroke();
+
+           context.lineWidth = 2;
+
+           var Fmag = Math.sqrt(Fx*Fx+Fy*Fy);
+           if (Fmag > 5) Fmag = 5;
+
+           context.fillStyle = arrowColor;
+           context.beginPath();
+           context.moveTo(Px+5*Fx-3*Fmag*Math.cos(theta+0.25*(3.1416/2)),Py-5*Fy+3*Fmag*Math.sin(theta+0.25*(3.1416/2)));
+           context.lineTo(Px+5*Fx,Py-5*Fy);
+           context.lineTo(Px+5*Fx-3*Fmag*Math.cos(theta-0.25*(3.1416/2)),Py-5*Fy+3*Fmag*Math.sin(theta-0.25*(3.1416/2)));
+
+           context.stroke();
+           context.fill();
+
+    }
+
+    function drawAxes(xAxisStart,yAxisStart,xNum, yNum, xOffset, xIncrement, yIncrement, xNumDecimals, yNumDecimals, xAxisTitle, yAxisTitle, graphTitle) {
+        // set background color for the graph
+           context.fillStyle = "#eff";
+           context.fillRect(xAxisStart, yAxisStart, 40*xNum, 40*yNum);
+
+           var axisLabel = '';
+           var axisValue = 0;
+
+         // vertical grid lines
+         context.lineWidth = 2;
+         context.strokeStyle = '#888';
+
+         for (var i = 0; i <= xNum; i++) {
+           context.beginPath();
+           context.moveTo(xAxisStart+40*i, yAxisStart);
+           context.lineTo(xAxisStart+40*i, yAxisStart+40*yNum+10);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = xOffset+xIncrement*(i);
+           axisLabel = axisValue.toFixed(xNumDecimals);
+           context.fillText(axisLabel, xAxisStart+40*i, yAxisStart+40*yNum+20);
+          }
+
+         // horizontal grid lines
+         for (i = 0; i <= yNum; i++) {
+           context.beginPath();
+           context.moveTo(xAxisStart-10, yAxisStart+40*i);
+           context.lineTo(xAxisStart+40*xNum, yAxisStart+40*i);
+           context.stroke();
+           context.font = '14pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'center';
+           context.textBaseline = 'middle';
+           axisValue = yIncrement*(yNum-i);
+           axisLabel = axisValue.toFixed(yNumDecimals);
+           context.fillText(axisLabel, xAxisStart-30, yAxisStart+40*i);
+
+          }
+
+         // x-axis
+           context.strokeStyle = '#000';
+           context.lineWidth = 4;
+           context.beginPath();
+           context.moveTo(xAxisStart-1, yAxisStart+40*yNum);
+           context.lineTo(xAxisStart+40*xNum+20, yAxisStart+40*yNum);
+           context.stroke();
+           context.moveTo(xAxisStart+40*xNum+10, yAxisStart+40*yNum-6);
+           context.lineTo(xAxisStart+40*xNum+20, yAxisStart+40*yNum);
+           context.lineTo(xAxisStart+40*xNum+10, yAxisStart+40*yNum+6);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.textAlign = 'left';
+           context.fillText(xAxisTitle, xAxisStart+40*xNum+24, yAxisStart+40*yNum);
+
+         // y-axis
+           context.strokeStyle = '#000';
+           context.beginPath();
+           context.moveTo(xAxisStart, yAxisStart-20);
+           context.lineTo(xAxisStart, yAxisStart+40*yNum);
+           context.stroke();
+           context.moveTo(xAxisStart-6, yAxisStart-10);
+           context.lineTo(xAxisStart, yAxisStart-20);
+           context.lineTo(xAxisStart+6, yAxisStart-10);
+           context.lineJoin = 'miter';
+           context.stroke();
+           context.strokeStyle = '#000';
+           context.textAlign = 'center';
+  //         console.log("In the drawMotion function, with yAxisTitle = " + yAxisTitle + xAxisStart );
+
+           context.font = '16pt Calibri';
+           context.fillStyle = 'black';
+           context.fillText(yAxisTitle, xAxisStart-30, yAxisStart - 35);
+
+           // graph title
+           context.font = 'bold 18pt Calibri';
+           context.fillStyle = 'purple';
+           context.textAlign = 'center';
+           context.fillText(graphTitle, xAxisStart+40*xNum/2, yAxisStart-24);
+
+    }
+    function drawSlider(sliderX, sliderY, sliderXMin, sliderXMax, sliderValueMin, sliderValueMax, sliderValue, sliderDecimals) {
+
+
+       context.strokeStyle = '#999';
+       context.lineWidth = 8;
+       context.beginPath();
+       context.moveTo(sliderXMin,sliderY);
+       context.lineTo(sliderXMax,sliderY);
+       context.stroke();
+
+       context.strokeStyle = '#44f';
+       context.lineWidth = 8;
+       context.beginPath();
+       context.moveTo(sliderXMin,sliderY);
+       context.lineTo(sliderX,sliderY);
+       context.stroke();
+
+       context.beginPath();
+       context.arc(sliderX, sliderY, 10, 0, 2 * Math.PI, false);
+       context.fillStyle = '#00f';
+       context.fill();
+       context.lineWidth = 1;
+       context.strokeStyle = 'black';
+       context.stroke();
+
+      }
+
+
+      function getLineColor(lambda) {
+        var redness = 0;
+        if (lambda <= 500) redness = Math.floor(160-160*(lambda-400)/100);
+        if ((lambda >= 558) && (lambda < 590))redness = Math.floor(255-255*(590-lambda)*(590-lambda)/(32*32));
+        if (lambda >= 590) redness = 255;
+        if (lambda >= 650) redness = Math.floor(255-2*(lambda-650));
+
+        var redString = redness.toString(16);
+        if (redString.length == 1) redString = "0"+redString;
+        var greenness = 0;
+        if ((lambda > 460) && (lambda < 500)) greenness = Math.floor(255 - 255*(500 - lambda)*(500-lambda)/1600);
+        if ((lambda >= 500) && (lambda <=  570))    greenness = 255;
+        if ((lambda > 570) && (lambda <=  640))    greenness = Math.floor(255-255*(lambda-570)*(lambda-570)/(70*70));
+        var greenString = greenness.toString(16);
+        if (greenString.length == 1) greenString = "0"+greenString;
+        var blueness = 0;
+        if (lambda < 460) blueness = 255;
+        if ((lambda >= 460) && (lambda < 550)) blueness = Math.floor(255 - 255*(lambda-460)*(lambda-460)/(90*90));
+        var blueString = blueness.toString(16);
+        if (blueString.length == 1) blueString = "0"+blueString;
+//        console.log(lambda + " " + redness + " " + greenness + " " +blueness);
+        var newlineColor = "#" + redString+greenString+blueString;
+        return newlineColor;
+
+    }
+
+//  Mouse and Touch event functions from  Wolfgang Bauer
+
+function whereClicked(x_,y_,what_) {    // underscore denotes local variables
+	//if (what_ == 'down') {console.log('('+x_+','+y_+')'+what_)};
+//	console.log('('+x_+','+y_+')'+what_);
+//    console.log("x offset = " + current1X + " y offset = " + current1Y);
+      if ((Math.abs(x_ - (fluidDensitySliderX)) < 40) && (Math.abs(y_ - fluidDensitySliderY) < 40))   // moving the mass 1 slider
+      {
+        fluidDensitySliderX = x_ ;
+        if (fluidDensitySliderX < fluidDensitySliderXMin) fluidDensitySliderX = fluidDensitySliderXMin;
+        if (fluidDensitySliderX > fluidDensitySliderXMax) fluidDensitySliderX = fluidDensitySliderXMax;
+        fluidDensitySliderValue = fluidDensitySliderValueMin + (fluidDensitySliderValueMax-fluidDensitySliderValueMin)*(fluidDensitySliderX-fluidDensitySliderXMin)/(fluidDensitySliderXMax-fluidDensitySliderXMin);
+        fluidDensity = fluidDensitySliderValue;
+        reset();
+      }
+      else if ((Math.abs(x_ - (blockSubmergedSliderX)) < 40) && (Math.abs(y_ - blockSubmergedSliderY) < 40))   // moving the mass 1 slider
+      {
+        blockSubmergedSliderX = x_ ;
+        if (blockSubmergedSliderX < blockSubmergedSliderXMin) blockSubmergedSliderX = blockSubmergedSliderXMin;
+        if (blockSubmergedSliderX > blockSubmergedSliderXMax) blockSubmergedSliderX = blockSubmergedSliderXMax;
+        blockSubmergedSliderValue = blockSubmergedSliderValueMin + (blockSubmergedSliderValueMax-blockSubmergedSliderValueMin)*(blockSubmergedSliderX-blockSubmergedSliderXMin)/(blockSubmergedSliderXMax-blockSubmergedSliderXMin);
+        blockSubmerged = blockSubmergedSliderValue;
+        if (minPercent > blockSubmerged) { minPercent = blockSubmerged; }
+        if (maxPercent < blockSubmerged) { maxPercent = blockSubmerged; }
+        drawMotion();
+      }
+      else if ((Math.abs(x_ - (blockDensitySliderX)) < 40) && (Math.abs(y_ - blockDensitySliderY) < 40))   // moving the mass 1 slider
+      {
+        blockDensitySliderX = x_ ;
+        if (blockDensitySliderX < blockDensitySliderXMin) blockDensitySliderX = blockDensitySliderXMin;
+        if (blockDensitySliderX > blockDensitySliderXMax) blockDensitySliderX = blockDensitySliderXMax;
+        blockDensitySliderValue = blockDensitySliderValueMin + (blockDensitySliderValueMax-blockDensitySliderValueMin)*(blockDensitySliderX-blockDensitySliderXMin)/(blockDensitySliderXMax-blockDensitySliderXMin);
+        blockDensity = blockDensitySliderValue;
+        reset();
+      }
+      else if ((Math.abs(x_ - (blockVolumeSliderX)) < 40) && (Math.abs(y_ - blockVolumeSliderY) < 40))   // moving the mass 1 slider
+      {
+        blockVolumeSliderX = x_ ;
+        if (blockVolumeSliderX < blockVolumeSliderXMin) blockVolumeSliderX = blockVolumeSliderXMin;
+        if (blockVolumeSliderX > blockVolumeSliderXMax) blockVolumeSliderX = blockVolumeSliderXMax;
+        blockVolumeSliderValue = blockVolumeSliderValueMin + (blockVolumeSliderValueMax-blockVolumeSliderValueMin)*(blockVolumeSliderX-blockVolumeSliderXMin)/(blockVolumeSliderXMax-blockVolumeSliderXMin);
+        blockVolume = blockVolumeSliderValue;
+        reset();
+      }
+
+	if (what_ == 'down') {
+//		dragRect = true;
+//		x1 = x_;     // x1, y1 are global variables
+//		y1 = y_;
+	}
+	if (what_ == 'move') {
+//		dragRect = true;
+//		dx = x_-x1;
+//		dy = y_-y1;
+	}
+	if (what_ == 'up') {
+//		dragRect = false;
+//		dx = x_-x1;
+//		dy = y_-y1;
+	}
+}
+
+function myMove(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'move');
+//	drawAll();
+//	drawMotion();
+
+}
+
+function myDown(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'down');
+	canvas.onmousemove = myMove;
+//	drawMotion();
+}
+
+function myUp(event){
+	var xClick = event.pageX - canvasesdiv.offsetLeft;
+	var yClick = event.pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'up');
+	canvas.onmousemove = null;
+//	drawMotion();
+}
+
+function myTouchMove(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'move');
+//	drawMotion();
+}
+
+function myTouchStart(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'down');
+//	drawMotion();
+}
+
+function myTouchEnd(event){
+	event.preventDefault();
+	var xClick = event.targetTouches[0].pageX - canvasesdiv.offsetLeft;
+	var yClick = event.targetTouches[0].pageY - canvasesdiv.offsetTop;
+	whereClicked(xClick,yClick,'up');
+//	drawMotion();
+}
+
+
+  </script>
+  <center><h3>Buoyant force</h3></center>
+<p>This simulation illustrates the concept of the buoyant force.</p>
+
+<p>The buoyant force is the upward force exerted on an object by a fluid
+ when the object is partly or entirely immersed in the fluid.
+In this case we place a low-density block in a container of fluid. The 
+block floats with some fraction submerged (the fraction submerged is the
+ block density divided by the fluid density). The buoyant force equals 
+the weight of the block, because the block is in equilibrium.
+However, the buoyant force is also given by Archimedes' principle, which
+ is that the buoyant force is equal to the weight of the fluid displaced
+ (which itself is equal to the density of the fluid multiplied by g 
+multiplied by the volume of fluid displaced by the object). </p>
+
+<p>Investigate what the buoyant force depends on (and what it does not depend on). Note that the simulation sets g to be 10 N/kg. </p>
+
+<p>Simulation written by Andrew Duffy, and first posted on 11-17-2018. </p>
+
+
+  <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="Buoyant%20force_files/88x31.png"></a><br>This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Andrew Duffy</span> is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br>This simulation can be found in the collection at <a xmlns:dct="http://purl.org/dc/terms/" href="http://physics.bu.edu/~duffy/classroom.html" rel="dct:source">http://physics.bu.edu/~duffy/classroom.html</a>.
+  
+        <p>The counter has been running on this page since 11-17-2018. The number of people accessing the page since then is:
+<br><img src="Buoyant%20force_files/Count.gif" align="absmiddle">
+
+
+
+</p></body></html>
