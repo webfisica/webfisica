@@ -1,6 +1,7 @@
 2022.2
 fluido_em_um_duto.html
-forca_de_empuxo.html 
+forca_de_empuxo.html
+pressao_em_um_fluido_estatico.html
 
 2022.1
 
