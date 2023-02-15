@@ -1,5 +1,5 @@
 2022.2
-fluido_em_um_duto.html
+CLAUDIA -> fluido_em_um_duto.html
 forca_de_empuxo.html
 pressao_em_um_fluido_estatico.html
 
