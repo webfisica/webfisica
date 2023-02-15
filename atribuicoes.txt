@@ -1,3 +1,7 @@
+2022.2
+fluido_em_um_duto.html
+forca_de_empuxo.html 
+
 2022.1
 
 CLAUDIA -> difusao.html
