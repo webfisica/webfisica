@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Lista de Arquivos de Física</title>
+    <title>Lista de Simulações de Física</title>
     <style>
-	ul {
-	  list-style-type: none;
-	  margin: 0;
-	  padding: 0;
-	}
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
 
-	li {
-	  margin: 10px 0;
-	  padding: 10px;
-	  background-color: #f8f8f8;
-	  border-radius: 5px;
-	  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-	  transition: transform 0.2s;
-	}
+li {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  display: inline-block;
+}
 
-	li:hover {
-	  transform: translateY(-5px);
-	}
+li:hover {
+  transform: translateY(-5px);
+}
+
+@media only screen and (max-width: 480px) {
+  li {
+    display: block;
+    margin: 10px 0;
+  }
+}
+
 
     </style>
   </head>
