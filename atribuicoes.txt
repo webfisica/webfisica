@@ -1,6 +1,6 @@
 2022.2
 CLAUDIA -> fluido_em_um_duto.html
-LUIZA -> forca_de_empuxo.html
+LUZIA -> forca_de_empuxo.html
 pressao_em_um_fluido_estatico.html
 
 2022.1
