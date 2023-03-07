@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>UFERSA - Cálculo de nota para Avaliação Final</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      h1 {
+        color: #008000;
+      }
+      label {
+        display: block;
+        margin: 20px 0 10px;
+      }
+      input[type="number"] {
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        background-color: #008000;
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+      button:hover {
+        background-color: #006400;
+      }
+      #mediaParcial {
+        font-size: 24px;
+        font-weight: bold;
+        color: #008000;
+        margin: 20px 0;
+      }
+      #resultado {
+        font-size: 24px;
+        font-weight: bold;
+        color: #008000;
+        margin: 20px 0;
+      }
+    </style>
+    <script>
+      function calcularMedia() {
+        // Obter os valores das notas
+        var nota1 = parseFloat(document.getElementById("nota1").value);
+        var nota2 = parseFloat(document.getElementById("nota2").value);
+        var nota3 = parseFloat(document.getElementById("nota3").value);
+        
+        // Calcular a média parcial
+        var mediaParcial = (nota1 + nota2 + nota3) / 3;
+        document.getElementById("mediaParcial").innerHTML = mediaParcial.toFixed(2);
+        
+        // Verificar se o aluno está aprovado ou reprovado
+        if (mediaParcial >= 7) {
+          document.getElementById("resultado").innerHTML = "Aprovado!";
+        } else if (mediaParcial < 3.5) {
+          document.getElementById("resultado").innerHTML = "Reprovado!";
+        } else {
+          // Calcular a nota necessária na quarta avaliação para ser aprovado
+          var mediaPonderada = (mediaParcial * 6 + 0 * 4) / 10;
+          var notaNecessaria = (5 - mediaPonderada * 0.6) / 0.4;
+          document.getElementById("resultado").innerHTML = "Nota necessária na quarta avaliação: " + notaNecessaria.toFixed(2);
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>UFERSA - Cálculo de nota para Avaliação Final</h1>
+    <label for="nota1">Nota 1:</label>
+    <input type="number" id="nota1"><br>
+    <label for="nota2">Nota 2:</label>
+    <input type="number" id="nota2"><br>
+    <label for="nota3">Nota 3:</label>
+    <input type="number" id="nota3"><br><br>
+    <button onclick="calcularMedia()">Calcular</button><br><br>
+<div id="mediaParcial"></div>
+<div id="resultado"></div>
+  </body>
+</html>
+
