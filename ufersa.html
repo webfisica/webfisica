@@ -82,8 +82,8 @@
           document.getElementById("resultado").innerHTML = "Reprovado!";
         } else {
           // Calcular a nota necessária na quarta avaliação para ser aprovado
-          var mediaPonderada = (mediaParcial * 6 + 0 * 4) / 10;
-          var notaNecessaria = (5 - mediaPonderada * 0.6) / 0.4;
+          //var mediaPonderada = (mediaParcial * 6 + 0 * 4) / 10;
+          var notaNecessaria = (5 - mediaParcial * 0.6) / 0.4;
           document.getElementById("resultado").innerHTML = "Nota necessária na quarta avaliação: " + notaNecessaria.toFixed(2);
         }
       }
