@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html>
+<!DOCTYPE html>
+<html>
   <head>
     <meta charset="UTF-8">
     <title>UFERSA - Cálculo de nota para Avaliação Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
       body {
         font-family: Arial, sans-serif;
         text-align: center;
+        margin: 0;
       }
       h1 {
         color: #008000;
+        margin: 20px 0;
+      }
+      form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 20px;
+        margin: 20px;
       }
       label {
         display: block;
@@ -47,6 +58,11 @@
         color: #008000;
         margin: 20px 0;
       }
+      @media screen and (max-width: 600px) {
+        form {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
     <script>
       function calcularMedia() {
@@ -72,7 +88,8 @@
         }
       }
     </script>
-  </head>
+  </head
+
   <body>
     <h1>UFERSA - Cálculo de nota para Avaliação Final</h1>
     <label for="nota1">Nota 1:</label>
